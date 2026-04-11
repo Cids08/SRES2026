@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-/* ─── Social Icons (inline SVG) ──────────────────────────── */
+/* ─── Social Icons ───────────────────────────────────────── */
 function IconFacebook({ size = 15 }) {
     return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -17,12 +17,8 @@ function IconMessenger({ size = 15 }) {
     );
 }
 
-/* ─── Images ─────────────────────────────────────────────── */
-const IMAGES = {
-    hero: "/images/hero-img-1-min.jpg",
-};
+const IMAGES = { hero: "/images/hero-img-1-min.jpg" };
 
-/* ─── Staff Data ──────────────────────────────────────────── */
 const PRINCIPAL = {
     name: "Randy T. Odi",
     position: "School Principal",
@@ -33,61 +29,49 @@ const PRINCIPAL = {
 };
 
 const STAFF = [
-    { name: "Mercy O. De Leon",    position: "Kinder Adviser",   grade: "Kinder",   img: "/images/staff_2.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-    { name: "Janice T. Odiaman",   position: "Grade I Adviser",  grade: "Grade I",  img: "/images/staff_3.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-    { name: "Elizabeth T. Villary",position: "Grade II Adviser", grade: "Grade II", img: "/images/staff_4.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-    { name: "Analisa O. Cepriano", position: "Grade III Adviser",grade: "Grade III",img: "/images/staff_5.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-    { name: "Cecile C. Alano",     position: "Grade IV Adviser", grade: "Grade IV", img: "/images/staff_6.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-    { name: "Elena T. Odi",        position: "Grade V Adviser",  grade: "Grade V",  img: "/images/staff_7.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-    { name: "Christina O. Tuplano",position: "Grade VI Adviser", grade: "Grade VI", img: "/images/staff_8.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-    { name: "Ginalyn T. Manlangit",position: "Grade VI Adviser", grade: "Grade VI", img: "/images/staff_9.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-    { name: "Ramil T. Dela Cruz",  position: "Subject Teacher",  grade: "Faculty",  img: "/images/staff_10.jpg", facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
+    { name: "Mercy O. De Leon",     position: "Kinder Adviser",    grade: "Kinder",    img: "/images/staff_2.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
+    { name: "Janice T. Odiaman",    position: "Grade I Adviser",   grade: "Grade I",   img: "/images/staff_3.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
+    { name: "Elizabeth T. Villary", position: "Grade II Adviser",  grade: "Grade II",  img: "/images/staff_4.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
+    { name: "Analisa O. Cepriano",  position: "Grade III Adviser", grade: "Grade III", img: "/images/staff_5.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
+    { name: "Cecile C. Alano",      position: "Grade IV Adviser",  grade: "Grade IV",  img: "/images/staff_6.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
+    { name: "Elena T. Odi",         position: "Grade V Adviser",   grade: "Grade V",   img: "/images/staff_7.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
+    { name: "Christina O. Tuplano", position: "Grade VI Adviser",  grade: "Grade VI",  img: "/images/staff_8.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
+    { name: "Ginalyn T. Manlangit", position: "Grade VI Adviser",  grade: "Grade VI",  img: "/images/staff_9.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
+    { name: "Ramil T. Dela Cruz",   position: "Subject Teacher",   grade: "Faculty",   img: "/images/staff_10.jpg", facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
 ];
 
 /* ─── Staff Card ──────────────────────────────────────────── */
 function StaffCard({ name, position, grade, img, facebook, messenger, quote }) {
     return (
-        <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-xl transition-all duration-200 relative">
-            {/* Bottom accent line on hover */}
+        <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-xl transition-all duration-200 relative flex flex-col h-full">
             <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#0a1f52] to-[#1a3a8a] opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10" />
 
             {/* Photo */}
-            <div className="relative h-80 overflow-hidden bg-[#f4f6fb]">
+            <div className="relative w-full h-64 overflow-hidden bg-[#eef1f8] flex-shrink-0">
                 <img
                     src={img}
                     alt={name}
-                    className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                 />
-                {/* Grade badge */}
                 <span className="absolute top-3 right-3 bg-[#0a1f52] text-yellow-400 text-[9px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full border border-yellow-400/40">
                     {grade}
                 </span>
             </div>
 
             {/* Body */}
-            <div className="p-5">
+            <div className="p-5 flex flex-col flex-1">
                 <h3 className="text-[#0a1f52] font-bold text-[15px] mb-0.5">{name}</h3>
                 <span className="block text-[11px] font-extrabold uppercase tracking-wide text-yellow-700 mb-3">{position}</span>
-                <p className="text-gray-400 text-xs leading-relaxed italic mb-4">"{quote}"</p>
-
-                {/* Social — Facebook & Messenger only */}
-                <div className="flex gap-2">
-                    <a
-                        href={facebook}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                <p className="text-gray-400 text-xs leading-relaxed italic mb-4 flex-1">"{quote}"</p>
+                <div className="flex gap-2 mt-auto">
+                    <a href={facebook} target="_blank" rel="noopener noreferrer"
                         className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-[#0a1f52] hover:text-yellow-400 hover:border-[#0a1f52] transition-all duration-200"
-                        title="Facebook"
-                    >
+                        title="Facebook">
                         <IconFacebook size={14} />
                     </a>
-                    <a
-                        href={messenger}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <a href={messenger} target="_blank" rel="noopener noreferrer"
                         className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-[#0a1f52] hover:text-yellow-400 hover:border-[#0a1f52] transition-all duration-200"
-                        title="Messenger"
-                    >
+                        title="Messenger">
                         <IconMessenger size={14} />
                     </a>
                 </div>
@@ -101,9 +85,9 @@ function StaffCard({ name, position, grade, img, facebook, messenger, quote }) {
 ══════════════════════════════════════════════════════════ */
 export default function Staff() {
     return (
-        <div className="bg-[#f4f6fb]">
+        <div className="bg-[#f4f6fb] overflow-x-hidden">
 
-            {/* ── HERO — mirrors About page ─────────────────────── */}
+            {/* ── HERO ─────────────────────────────────────────── */}
             <section className="relative overflow-hidden" style={{ minHeight: 340 }}>
                 {/* Left navy half */}
                 <div className="absolute inset-0 bg-[#0a1f52]" />
@@ -113,15 +97,8 @@ export default function Staff() {
                     className="absolute right-0 top-0 h-full w-3/5"
                     style={{ clipPath: "polygon(12% 0, 100% 0, 100% 100%, 0% 100%)" }}
                 >
-                    <img
-                        src={IMAGES.hero}
-                        alt="SRES Staff"
-                        className="w-full h-full object-cover"
-                    />
-                    <div
-                        className="absolute inset-0"
-                        style={{ background: "linear-gradient(to right, #0a1f52 0%, transparent 40%)" }}
-                    />
+                    <img src={IMAGES.hero} alt="SRES Staff" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to right, #0a1f52 0%, transparent 40%)" }} />
                     <div className="absolute inset-0 bg-[#0a1f52]/45" />
                 </div>
 
@@ -149,7 +126,7 @@ export default function Staff() {
 
             {/* ── STAFF SECTION ─────────────────────────────────── */}
             <section className="py-16 sm:py-24">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
                     {/* Section header */}
                     <div className="text-center mb-14">
@@ -166,18 +143,13 @@ export default function Staff() {
 
                     {/* ── Principal (featured) ── */}
                     <div className="flex justify-center mb-14">
-                        <div className="bg-[#0a1f52] rounded-2xl overflow-hidden flex flex-col sm:flex-row max-w-[580px] w-full shadow-xl relative">
-                            {/* Gold bottom line */}
+                        <div className="bg-[#0a1f52] rounded-2xl overflow-hidden flex flex-col sm:flex-row max-w-[560px] w-full shadow-xl relative">
                             <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-yellow-700 via-yellow-400 to-yellow-700" />
-
-                            {/* Photo */}
                             <img
                                 src={PRINCIPAL.img}
                                 alt={PRINCIPAL.name}
-                                className="w-full sm:w-52 h-64 sm:h-auto object-contain object-center flex-shrink-0 bg-[#0d2660]"
+                                className="w-full sm:w-48 h-56 sm:h-auto object-cover object-top flex-shrink-0 bg-[#0d2660]"
                             />
-
-                            {/* Body */}
                             <div className="p-7 flex flex-col justify-center">
                                 <span className="inline-flex items-center gap-1.5 bg-yellow-400/15 border border-yellow-400/35 text-yellow-200 text-[9px] font-extrabold uppercase tracking-[0.16em] px-3 py-1 rounded-full mb-3 w-fit">
                                     ★ &nbsp; School Principal
@@ -185,24 +157,15 @@ export default function Staff() {
                                 <h3 className="text-white font-extrabold text-xl mb-1">{PRINCIPAL.name}</h3>
                                 <span className="block text-yellow-400 text-[11px] font-extrabold uppercase tracking-widest mb-3">{PRINCIPAL.position}</span>
                                 <p className="text-white/55 text-sm leading-relaxed italic mb-5">"{PRINCIPAL.quote}"</p>
-
                                 <div className="flex gap-2">
-                                    <a
-                                        href={PRINCIPAL.facebook}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                    <a href={PRINCIPAL.facebook} target="_blank" rel="noopener noreferrer"
                                         className="w-9 h-9 rounded-lg bg-white/8 border border-white/15 flex items-center justify-center text-white/60 hover:bg-yellow-400/20 hover:text-yellow-400 hover:border-yellow-400/40 transition-all duration-200"
-                                        title="Facebook"
-                                    >
+                                        title="Facebook">
                                         <IconFacebook size={15} />
                                     </a>
-                                    <a
-                                        href={PRINCIPAL.messenger}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                    <a href={PRINCIPAL.messenger} target="_blank" rel="noopener noreferrer"
                                         className="w-9 h-9 rounded-lg bg-white/8 border border-white/15 flex items-center justify-center text-white/60 hover:bg-yellow-400/20 hover:text-yellow-400 hover:border-yellow-400/40 transition-all duration-200"
-                                        title="Messenger"
-                                    >
+                                        title="Messenger">
                                         <IconMessenger size={15} />
                                     </a>
                                 </div>
@@ -219,7 +182,7 @@ export default function Staff() {
                     </div>
 
                     {/* ── Staff Grid ── */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
                         {STAFF.map((member) => (
                             <StaffCard key={member.name} {...member} />
                         ))}
@@ -230,7 +193,7 @@ export default function Staff() {
 
             {/* ── CTA ───────────────────────────────────────────── */}
             <section className="bg-yellow-500 py-16">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-8">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-8">
                     <div>
                         <p className="text-[#0a1f52]/50 text-[11px] font-extrabold uppercase tracking-[0.2em] mb-2">Join the Team</p>
                         <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0a1f52] leading-snug">
@@ -240,7 +203,7 @@ export default function Staff() {
                             We're always looking for passionate teachers dedicated to shaping young minds.
                         </p>
                     </div>
-                    <div className="flex flex-wrap gap-3 flex-shrink-0">
+                    <div className="flex-shrink-0">
                         <Link
                             to="/contact"
                             className="inline-flex items-center gap-2 bg-[#0a1f52] hover:bg-[#1a3a8a] text-white font-extrabold text-sm px-8 py-3.5 rounded-full transition-colors duration-200"
