@@ -161,9 +161,9 @@ export default function Announcement() {
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, #0a1f52 0%, transparent 40%)" }} />
           <div style={{ position: "absolute", inset: 0, background: "rgba(10,31,82,0.45)" }} />
         </div>
+        {/* Gold bar sits flush at hero bottom — nav sits directly below, no gap/overlap */}
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: "linear-gradient(to right, #92400e, #facc15, #92400e)", zIndex: 10 }} />
 
-        {/* Content — left-aligned, flex column, same as About */}
         <div style={{ position: "relative", zIndex: 1, maxWidth: 1280, margin: "0 auto", padding: "80px 24px 96px" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
             <p style={{ color: "#facc15", fontSize: 11, fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", margin: "0 0 12px 0" }}>
@@ -179,11 +179,28 @@ export default function Announcement() {
         </div>
       </section>
 
-      {/* ── TABS ── */}
+      {/* ── TABS — flex-wrap, no overflow scroll, shrinks on small screens ── */}
       <nav style={{ background: "#0a1f52", borderBottom: "4px solid #f5c518" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 40px", display: "flex" }}>
+        <div style={{
+          maxWidth: 1100, margin: "0 auto", padding: "0 8px",
+          display: "flex", flexWrap: "wrap",
+        }}>
           {CATEGORIES.map((c) => (
-            <button key={c.key} onClick={() => setActive(c.key)} style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.15em", textTransform: "uppercase", padding: "13px 20px", border: "none", cursor: "pointer", background: active === c.key ? "#f5c518" : "transparent", color: active === c.key ? "#0a1f52" : "rgba(255,255,255,0.48)", transition: "all 0.15s" }}>
+            <button
+              key={c.key}
+              onClick={() => setActive(c.key)}
+              style={{
+                fontSize: "clamp(9px, 2vw, 11px)",
+                fontWeight: 800, letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                padding: "clamp(10px, 2vw, 13px) clamp(8px, 3vw, 20px)",
+                border: "none", cursor: "pointer", whiteSpace: "nowrap",
+                background: active === c.key ? "#f5c518" : "transparent",
+                color: active === c.key ? "#0a1f52" : "rgba(255,255,255,0.48)",
+                transition: "all 0.15s",
+                flex: "1 1 auto",
+              }}
+            >
               {c.label}
             </button>
           ))}
@@ -191,7 +208,7 @@ export default function Announcement() {
       </nav>
 
       {/* ── CONTENT ── */}
-      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "44px 40px 72px" }}>
+      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "44px 16px 72px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
           <div style={{ width: 4, height: 18, background: "#f5c518" }} />
           <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.22em", textTransform: "uppercase", color: "#0a1f52" }}>{filtered.length} {filtered.length === 1 ? "Notice" : "Notices"}</span>
