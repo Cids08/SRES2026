@@ -95,7 +95,7 @@ function SectionCard({ title, children }) {
   );
 }
 
-/* ─── Responsive grids (auto-fit) ───────────────────────── */
+/* ─── Responsive grids ───────────────────────────────────── */
 const g2 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 };
 const g3 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 14 };
 
@@ -140,13 +140,12 @@ function DocItem({ label, required, sub, showUpload = true, checked, onChange })
   );
 }
 
-/* ─── Step bar — flex-wrap, no overflow, shrinks on mobile ── */
+/* ─── Step bar ───────────────────────────────────────────── */
 function StepBar({ current }) {
   return (
     <div style={{ background: NAV }}>
-      {/* Progress line — sits at bottom of nav block, no overlap */}
       <div style={{
-        maxWidth: 860, margin: "0 auto", padding: "0 8px",
+        maxWidth: 1280, margin: "0 auto", padding: "0 8px",
         display: "flex", flexWrap: "wrap",
         borderBottom: `4px solid ${GOLD}`,
       }}>
@@ -302,30 +301,89 @@ export default function Enroll() {
   }
 
   return (
-    <div style={{ background: BG, minHeight: "100vh" }}>
+    <div style={{ background: "#f2efe8", minHeight: "100vh" }}>
 
-      {/* ── HERO ── */}
-      <section style={{ background: NAV, position: "relative", overflow: "hidden", minHeight: 240 }}>
-        <div style={{ position: "absolute", right: 0, top: 0, width: "55%", height: "100%", clipPath: "polygon(14% 0, 100% 0, 100% 100%, 0% 100%)" }}>
-          <img src={HERO_IMG} alt="SRES Campus" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      {/* ── HERO ─────────────────────────────────────────────
+          FIX 1: paddingBottom: 0 so the absolute gold bar sits
+                 flush at the very bottom — no gap, no overlap.
+          FIX 2: h1 uses whiteSpace "nowrap" + clamp font size
+                 so "Enrollment Form" stays on ONE line like
+                 the Announcement page, scaling down on mobile.
+      ──────────────────────────────────────────────────── */}
+      <section style={{
+        background: "#0a1f52",
+        position: "relative",
+        overflow: "hidden",
+        minHeight: 300,
+        /* paddingBottom: 0 is the default — the gold bar is
+           absolute at bottom:0 so it always hugs the edge */
+      }}>
+
+        {/* Right photo panel */}
+        <div style={{
+          position: "absolute", right: 0, top: 0,
+          width: "60%", height: "100%",
+          clipPath: "polygon(12% 0, 100% 0, 100% 100%, 0% 100%)",
+        }}>
+          <img src={HERO_IMG} alt="SRES Campus"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, #0a1f52 0%, transparent 40%)" }} />
-          <div style={{ position: "absolute", inset: 0, background: "rgba(10,31,82,0.5)" }} />
+          <div style={{ position: "absolute", inset: 0, background: "rgba(10,31,82,0.45)" }} />
         </div>
-        {/* Gold bottom bar is part of hero, StepBar sits directly below — no z-index clash */}
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: `linear-gradient(to right, #92400e, ${GOLD}, #92400e)`, zIndex: 10 }} />
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 1100, margin: "0 auto", padding: "52px 20px 68px" }}>
-          <p style={{ color: GOLD, fontSize: 11, fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", margin: "0 0 10px" }}>
-            San Roque Elementary School
-          </p>
-          <h1 style={{ margin: "0 0 12px", color: "#fff", fontSize: "clamp(1.9rem, 6vw, 3.5rem)", fontWeight: 800, lineHeight: 1.05, letterSpacing: "-0.02em" }}>
-            Enrollment <span style={{ color: GOLD }}>Form</span>
-          </h1>
-          <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 14, lineHeight: 1.7, maxWidth: 400, margin: 0 }}>
-            School Year 2025–2026. Complete all sections to secure your child's place.
-          </p>
+
+        {/* Gold bar — identical to Announcement page */}
+        <div style={{
+          position: "absolute", bottom: 0, left: 0, right: 0,
+          height: 4,
+          background: "linear-gradient(to right, #92400e, #facc15, #92400e)",
+          zIndex: 10,
+        }} />
+
+        {/* Hero content */}
+        <div style={{
+          position: "relative", zIndex: 1,
+          maxWidth: 1280, margin: "0 auto",
+          /* Extra bottom padding keeps text clear of the 4px gold bar */
+          padding: "80px 24px 100px",
+        }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", maxWidth: 640 }}>
+
+            <p style={{
+              color: "#facc15", fontSize: 11, fontWeight: 800,
+              letterSpacing: "0.2em", textTransform: "uppercase",
+              margin: "0 0 12px 0",
+            }}>
+              San Roque Elementary School
+            </p>
+
+            {/* FIX: one line, scales with viewport, never wraps */}
+            <h1 style={{
+              margin: "0 0 20px 0",
+              color: "#fff",
+              fontSize: "clamp(1.8rem, 5.5vw, 4.5rem)",
+              fontWeight: 800,
+              lineHeight: 1,
+              letterSpacing: "-0.02em",
+              whiteSpace: "nowrap",   /* ← keeps it on one line */
+            }}>
+              Enrollment <span style={{ color: "#facc15" }}>Form</span>
+            </h1>
+
+            <p style={{
+              color: "rgba(255,255,255,0.55)",
+              fontSize: "clamp(13px, 2vw, 15px)",
+              lineHeight: 1.7,
+              maxWidth: 448,
+              margin: 0,
+            }}>
+              School Year 2025–2026. Complete all sections to secure your child's place.
+            </p>
+
+          </div>
         </div>
       </section>
 
+      {/* Step bar — sits directly below hero, gold bar from hero is flush above it */}
       <StepBar current={step} />
 
       {/* Data notice — only on step 0 */}
