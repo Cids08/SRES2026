@@ -85,7 +85,7 @@ function StaffCard({ name, position, grade, img, facebook, messenger, quote }) {
 ══════════════════════════════════════════════════════════ */
 export default function Staff() {
     return (
-        <div className="bg-[#f4f6fb] overflow-x-hidden">
+        <div style={{ background: "#f2efe8", minHeight: "100vh" }}>
 
             {/* ── HERO ─────────────────────────────────────────── */}
             <section className="relative overflow-hidden" style={{ minHeight: 340 }}>
@@ -105,12 +105,11 @@ export default function Staff() {
                 {/* Gold bottom stripe */}
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-700 via-yellow-400 to-yellow-700 z-10" />
 
-                {/* Content */}
-                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-24">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-8">
-                        <div>
-                            <p className="text-yellow-400 text-[11px] font-extrabold uppercase tracking-[0.2em] mb-3">
-                                San Roque Elementary School
+                    {/* Content — left-aligned, flex column, same as About */}
+                    <div style={{ position: "relative", zIndex: 1, maxWidth: 1280, margin: "0 auto", padding: "80px 24px 96px" }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                            <p style={{ color: "#facc15", fontSize: 11, fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", margin: "0 0 12px 0" }}>
+                            San Roque Elementary School
                             </p>
                             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-none mb-5">
                                 Our <span className="text-yellow-400">Teachers</span>
@@ -121,7 +120,6 @@ export default function Staff() {
                             </p>
                         </div>
                     </div>
-                </div>
             </section>
 
             {/* ── STAFF SECTION ─────────────────────────────────── */}

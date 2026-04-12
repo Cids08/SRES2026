@@ -1,256 +1,198 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 
 const HERO_IMG = "/images/hero-img-1-min.jpg";
 
 const CATEGORIES = [
-    { key: "all",       label: "All News" },
-    { key: "event",     label: "Events" },
-    { key: "academic",  label: "Academic" },
-    { key: "community", label: "Community" },
+  { key: "all",       label: "All News"  },
+  { key: "event",     label: "Events"    },
+  { key: "academic",  label: "Academic"  },
+  { key: "community", label: "Community" },
 ];
 
-const CATEGORY_STYLES = {
-    event:     { badge: "bg-red-100 text-red-700 border-red-200",     border: "border-l-red-500"    },
-    academic:  { badge: "bg-cyan-100 text-cyan-700 border-cyan-200",   border: "border-l-cyan-500"  },
-    community: { badge: "bg-green-100 text-green-700 border-green-200",border: "border-l-green-500" },
-};
+const CAT_LABEL = { event: "Event", academic: "Academic", community: "Community" };
 
 const NEWS = [
-    {
-        id: 1,
-        category: "event",
-        title: "Grand Alumni Homecoming 2024",
-        summary: "Join us for our much-anticipated Annual Alumni Homecoming! Reconnect with old classmates, share memories, and celebrate the enduring spirit of San Roque Elementary School.",
-        date: "April 1, 2024",
-        img: "/images/img-school-5-min.jpg",
-        details: {
-            heading: "Event Details",
-            items: [
-                { label: "Date", value: "May 6, 2024" },
-                { label: "Time", value: "2:00 PM – 8:00 PM" },
-                { label: "Venue", value: "San Roque Elementary School Grounds" },
-                { label: "Dress Code", value: "Smart Casual" },
-            ],
-            highlights: [
-                "Nostalgic photo exhibitions",
-                "School tour",
-                "Alumni achievements showcase",
-                "Dinner and networking",
-                "Special performances",
-            ],
-        },
+  {
+    id: 1, category: "event",
+    title: "Grand Alumni Homecoming 2024",
+    summary: "Join us for our much-anticipated Annual Alumni Homecoming. Reconnect with old classmates, share memories, and celebrate the enduring spirit of San Roque Elementary School.",
+    date: "April 1, 2024", img: "/images/img-school-5-min.jpg",
+    details: {
+      items: [
+        { label: "Date", value: "May 6, 2024" },
+        { label: "Time", value: "2:00 PM – 8:00 PM" },
+        { label: "Venue", value: "SRES School Grounds" },
+        { label: "Dress Code", value: "Smart Casual" },
+      ],
+      list: ["Nostalgic photo exhibitions", "Guided school tour", "Alumni achievements showcase", "Dinner and networking", "Special performances"],
     },
-    {
-        id: 2,
-        category: "academic",
-        title: "Math Olympiad Success",
-        summary: "Our math team demonstrates exceptional problem-solving skills, bringing home multiple medals from the national competition.",
-        date: "March 10, 2024",
-        img: null,
-        details: {
-            heading: "Competition Highlights",
-            items: [
-                { label: "Date", value: "March 10, 2024" },
-                { label: "Location", value: "Regional Math Competition" },
-                { label: "Achievement", value: "Multiple Medals" },
-            ],
-            body: "Our talented math team showcased exceptional problem-solving skills and mathematical prowess, bringing home multiple medals from the regional mathematics competition.",
-        },
+  },
+  {
+    id: 2, category: "academic",
+    title: "Math Olympiad — Multiple Medals Won",
+    summary: "Our mathematics team demonstrated exceptional skills at the regional competition, bringing home multiple medals and pride to San Roque Elementary School.",
+    date: "March 10, 2024", img: null,
+    details: {
+      items: [
+        { label: "Competition", value: "Regional Math Olympiad" },
+        { label: "Date", value: "March 10, 2024" },
+        { label: "Result", value: "Multiple Medals" },
+      ],
+      body: "Our talented math team showcased exceptional problem-solving skills. We congratulate every student who represented the school with excellence and determination.",
     },
-    {
-        id: 3,
-        category: "community",
-        title: "Community Service Day",
-        summary: "Students and teachers unite to make a difference, participating in local environmental cleanup and community support initiatives.",
-        date: "March 5, 2024",
-        img: null,
-        details: {
-            heading: "Event Details",
-            items: [
-                { label: "Date", value: "March 5, 2024" },
-                { label: "Location", value: "Local Community Areas" },
-                { label: "Focus", value: "Environmental Cleanup" },
-            ],
-            body: "Students and teachers collaborated to make a meaningful difference in the local community through environmental cleanup and support initiatives.",
-        },
+  },
+  {
+    id: 3, category: "community",
+    title: "Community Service Day",
+    summary: "Students and faculty united for a local environmental cleanup and community outreach, reinforcing our school's commitment to service and bayanihan.",
+    date: "March 5, 2024", img: null,
+    details: {
+      items: [
+        { label: "Date", value: "March 5, 2024" },
+        { label: "Location", value: "Viga Community Areas" },
+        { label: "Focus", value: "Environmental Cleanup" },
+      ],
+      body: "Our students showed that true education extends beyond the classroom. Their dedication to community service reflects the values we nurture at SRES every day.",
     },
-    {
-        id: 4,
-        category: "event",
-        title: "Art Exhibition Highlights",
-        summary: "Annual student art exhibition showcases creativity, imagination, and artistic talent across various mediums and grade levels.",
-        date: "February 28, 2024",
-        img: null,
-        details: {
-            heading: "Exhibition Details",
-            items: [
-                { label: "Date", value: "February 28, 2024" },
-                { label: "Location", value: "School Art Gallery" },
-                { label: "Participants", value: "All Grade Levels" },
-            ],
-            body: "Our annual student art exhibition celebrated creativity and imagination, featuring incredible artwork from students across all grade levels.",
-        },
+  },
+  {
+    id: 4, category: "event",
+    title: "Annual Student Art Exhibition",
+    summary: "The school gallery showcased creativity and imagination from pupils across all grade levels — paintings, drawings, and mixed-media works on proud display.",
+    date: "February 28, 2024", img: null,
+    details: {
+      items: [
+        { label: "Date", value: "February 28, 2024" },
+        { label: "Venue", value: "School Art Gallery" },
+        { label: "Open to", value: "Parents & Community" },
+      ],
+      body: "Every artwork in the exhibition told a story unique to its young artist. The creativity on display was a testament to the dedication of our pupils and their teachers.",
     },
+  },
 ];
 
-function NewsCard({ item }) {
-    const [open, setOpen] = useState(false);
-    const style = CATEGORY_STYLES[item.category];
+function Badge({ label }) {
+  return (
+    <span style={{ display: "inline-block", fontSize: 9, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", padding: "3px 10px", background: "#f5c518", color: "#0a1f52" }}>
+      {label}
+    </span>
+  );
+}
 
-    return (
-        <div className={`bg-white rounded-2xl border border-gray-100 border-l-4 ${style.border} shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden`}>
-            {/* Top — image (if any) + content */}
-            <div className="flex flex-col sm:flex-row">
-                {item.img && (
-                    <div className="sm:w-56 h-44 sm:h-auto flex-shrink-0 overflow-hidden">
-                        <img src={item.img} alt={item.title} className="w-full h-full object-cover" />
-                    </div>
-                )}
-                <div className="p-6 flex flex-col justify-between flex-1">
-                    <div>
-                        {/* Category badge + title */}
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            <span className={`text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${style.badge}`}>
-                                {item.category}
-                            </span>
-                            <h3 className="text-[#0a1f52] font-bold text-base leading-snug">{item.title}</h3>
-                        </div>
-                        <p className="text-gray-500 text-sm leading-relaxed mb-4">{item.summary}</p>
-                    </div>
-                    <div className="flex items-center justify-between flex-wrap gap-3">
-                        <span className="text-gray-400 text-xs">Posted on: {item.date}</span>
-                        <button
-                            onClick={() => setOpen(!open)}
-                            className="text-[11px] font-extrabold uppercase tracking-wide px-4 py-2 rounded-full bg-[#0a1f52] text-white hover:bg-[#1a3a8a] transition-colors duration-200"
-                        >
-                            {open ? "Hide Details" : "View Details"}
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Expandable details */}
-            {open && (
-                <div className="border-t border-gray-100 bg-[#f4f6fb] px-6 py-5">
-                    <p className="text-[11px] font-extrabold uppercase tracking-widest text-[#0a1f52] mb-3">{item.details.heading}</p>
-                    {item.details.items && (
-                        <ul className="space-y-1 mb-3">
-                            {item.details.items.map((d) => (
-                                <li key={d.label} className="text-sm text-gray-600">
-                                    <span className="font-semibold text-[#0a1f52]">{d.label}:</span> {d.value}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                    {item.details.highlights && (
-                        <ul className="space-y-1 mb-3">
-                            {item.details.highlights.map((h) => (
-                                <li key={h} className="text-sm text-gray-600 flex items-start gap-2">
-                                    <span className="text-yellow-500 mt-0.5">★</span> {h}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                    {item.details.body && (
-                        <p className="text-sm text-gray-600 leading-relaxed">{item.details.body}</p>
-                    )}
-                </div>
-            )}
+function NewsCard({ item, featured }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <article style={{ background: "#fff", border: "1.5px solid #0a1f52", overflow: "hidden" }}>
+      <div style={{ display: "flex", flexWrap: "wrap" }}>
+        {item.img && (
+          <div style={{ width: featured ? "100%" : 156, height: featured ? 200 : "auto", minHeight: featured ? 200 : 120, overflow: "hidden", flexShrink: 0 }}>
+            <img src={item.img} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          </div>
+        )}
+        {!item.img && <div style={{ width: 6, background: "#f5c518", flexShrink: 0 }} />}
+        <div style={{ flex: 1, minWidth: 200, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
+          <Badge label={CAT_LABEL[item.category]} />
+          <h3 style={{ margin: 0, fontSize: featured ? 17 : 14.5, fontWeight: 800, color: "#0a1f52", lineHeight: 1.3, fontFamily: "Georgia, serif" }}>{item.title}</h3>
+          <p style={{ margin: 0, fontSize: 13, color: "#3a3a3a", lineHeight: 1.75, fontFamily: "Georgia, serif" }}>{item.summary}</p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 10, borderTop: "1px solid #e4e0d4", marginTop: "auto", flexWrap: "wrap", gap: 8 }}>
+            <time style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#0a1f52", opacity: 0.45 }}>{item.date}</time>
+            <button onClick={() => setOpen(!open)} style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", padding: "6px 14px", border: "1.5px solid #0a1f52", cursor: "pointer", background: open ? "#0a1f52" : "transparent", color: open ? "#f5c518" : "#0a1f52", transition: "all 0.15s" }}>
+              {open ? "Close" : "Read More"}
+            </button>
+          </div>
         </div>
-    );
+      </div>
+      {open && (
+        <div style={{ borderTop: "1.5px solid #0a1f52", background: "#0a1f52", padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+          {item.details.items && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 2 }}>
+              {item.details.items.map((d, i) => (
+                <div key={i} style={{ background: "#0d2660", padding: "10px 14px" }}>
+                  <p style={{ margin: "0 0 2px", fontSize: 9, fontWeight: 800, letterSpacing: "0.16em", textTransform: "uppercase", color: "#f5c518" }}>{d.label}</p>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#fff", fontFamily: "Georgia, serif" }}>{d.value}</p>
+                </div>
+              ))}
+            </div>
+          )}
+          {item.details.list && (
+            <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 7 }}>
+              {item.details.list.map((h, i) => (
+                <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 13, color: "rgba(255,255,255,0.82)", fontFamily: "Georgia, serif", lineHeight: 1.5 }}>
+                  <span style={{ width: 10, height: 10, background: "#f5c518", flexShrink: 0, marginTop: 3 }} />{h}
+                </li>
+              ))}
+            </ul>
+          )}
+          {item.details.body && <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.78)", lineHeight: 1.8, fontFamily: "Georgia, serif" }}>{item.details.body}</p>}
+        </div>
+      )}
+    </article>
+  );
 }
 
 export default function News() {
-    const [active, setActive] = useState("all");
+  const [active, setActive] = useState("all");
+  const filtered = active === "all" ? NEWS : NEWS.filter((n) => n.category === active);
 
-    const filtered = active === "all" ? NEWS : NEWS.filter((n) => n.category === active);
+  return (
+    <div style={{ background: "#f2efe8", minHeight: "100vh" }}>
 
-    return (
-        <div className="bg-[#f4f6fb]">
-
-            {/* ── HERO ── */}
-            <section className="relative overflow-hidden" style={{ minHeight: 340 }}>
-                <div className="absolute inset-0 bg-[#0a1f52]" />
-                <div
-                    className="absolute right-0 top-0 h-full w-3/5"
-                    style={{ clipPath: "polygon(12% 0, 100% 0, 100% 100%, 0% 100%)" }}
-                >
-                    <img src={HERO_IMG} alt="SRES News" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0" style={{ background: "linear-gradient(to right, #0a1f52 0%, transparent 40%)" }} />
-                    <div className="absolute inset-0 bg-[#0a1f52]/45" />
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-700 via-yellow-400 to-yellow-700 z-10" />
-                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-24">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-8">
-                        <div>
-                            <p className="text-yellow-400 text-[11px] font-extrabold uppercase tracking-[0.2em] mb-3">
-                                San Roque Elementary School
-                            </p>
-                            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-none mb-5">
-                                School <span className="text-yellow-400">Highlights</span>
-                            </h1>
-                            <p className="text-white/55 text-[15px] leading-relaxed max-w-md">
-                                Discover the exciting moments, student achievements, and upcoming events
-                                that make our school community special.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ── CONTENT ── */}
-            <section className="py-16 sm:py-24">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6">
-
-                    {/* Filter tabs */}
-                    <div className="flex flex-wrap gap-2 mb-10">
-                        {CATEGORIES.map((c) => (
-                            <button
-                                key={c.key}
-                                onClick={() => setActive(c.key)}
-                                className={`text-[11px] font-extrabold uppercase tracking-widest px-5 py-2.5 rounded-full border transition-all duration-200 ${
-                                    active === c.key
-                                        ? "bg-[#0a1f52] text-white border-[#0a1f52]"
-                                        : "bg-white text-[#0a1f52] border-gray-200 hover:border-[#0a1f52]"
-                                }`}
-                            >
-                                {c.label}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* News list */}
-                    <div className="space-y-5">
-                        {filtered.map((item) => (
-                            <NewsCard key={item.id} item={item} />
-                        ))}
-                        {filtered.length === 0 && (
-                            <p className="text-center text-gray-400 py-12 text-sm">No news in this category yet.</p>
-                        )}
-                    </div>
-
-                    {/* Legend */}
-                    <div className="mt-10 bg-white rounded-2xl border border-gray-100 px-6 py-5">
-                        <p className="text-[11px] font-extrabold uppercase tracking-widest text-[#0a1f52] mb-3">Category Guide</p>
-                        <div className="flex flex-wrap gap-4">
-                            {[
-                                { key: "event",     label: "Event" },
-                                { key: "academic",  label: "Academic" },
-                                { key: "community", label: "Community" },
-                            ].map(({ key, label }) => (
-                                <div key={key} className="flex items-center gap-2">
-                                    <span className={`text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${CATEGORY_STYLES[key].badge}`}>
-                                        {label}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                </div>
-            </section>
-
+      {/* ── HERO ── */}
+      <section style={{ background: "#0a1f52", position: "relative", overflow: "hidden", minHeight: 340 }}>
+        <div style={{ position: "absolute", right: 0, top: 0, width: "60%", height: "100%", clipPath: "polygon(12% 0, 100% 0, 100% 100%, 0% 100%)" }}>
+          <img src={HERO_IMG} alt="SRES Campus" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, #0a1f52 0%, transparent 40%)" }} />
+          <div style={{ position: "absolute", inset: 0, background: "rgba(10,31,82,0.45)" }} />
         </div>
-    );
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: "linear-gradient(to right, #92400e, #facc15, #92400e)", zIndex: 10 }} />
+
+        {/* Content — left-aligned, flex column, same as About */}
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 1280, margin: "0 auto", padding: "80px 24px 96px" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+            <p style={{ color: "#facc15", fontSize: 11, fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", margin: "0 0 12px 0" }}>
+              San Roque Elementary School
+            </p>
+            <h1 style={{ margin: "0 0 20px 0", color: "#fff", fontSize: "clamp(2.8rem, 6vw, 4.5rem)", fontWeight: 800, lineHeight: 1, letterSpacing: "-0.02em" }}>
+              School <span style={{ color: "#facc15" }}>Highlights</span>
+            </h1>
+            <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 15, lineHeight: 1.7, maxWidth: 448, margin: 0 }}>
+              News, events, and stories from our school community — for students, parents, and teachers.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── TABS ── */}
+      <nav style={{ background: "#0a1f52", borderBottom: "4px solid #f5c518" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 40px", display: "flex" }}>
+          {CATEGORIES.map((c) => (
+            <button key={c.key} onClick={() => setActive(c.key)} style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.15em", textTransform: "uppercase", padding: "13px 20px", border: "none", cursor: "pointer", background: active === c.key ? "#f5c518" : "transparent", color: active === c.key ? "#0a1f52" : "rgba(255,255,255,0.48)", transition: "all 0.15s" }}>
+              {c.label}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {/* ── CONTENT ── */}
+      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "44px 40px 72px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
+          <div style={{ width: 4, height: 18, background: "#f5c518" }} />
+          <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.22em", textTransform: "uppercase", color: "#0a1f52" }}>{filtered.length} {filtered.length === 1 ? "Article" : "Articles"}</span>
+          <div style={{ flex: 1, height: 1, background: "#0a1f52", opacity: 0.1 }} />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {filtered.map((item, i) => <NewsCard key={item.id} item={item} featured={i === 0} />)}
+          {filtered.length === 0 && (
+            <div style={{ border: "1.5px solid #0a1f52", padding: "60px 24px", textAlign: "center", background: "#fff" }}>
+              <p style={{ fontSize: 14, color: "#0a1f52", opacity: 0.38, fontFamily: "Georgia, serif", margin: 0 }}>No articles in this category yet.</p>
+            </div>
+          )}
+        </div>
+        <div style={{ marginTop: 36, padding: "14px 18px", border: "1.5px solid #0a1f52", background: "#fff", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "#0a1f52", opacity: 0.45 }}>Categories:</span>
+          {["event", "academic", "community"].map((k) => <Badge key={k} label={CAT_LABEL[k]} />)}
+        </div>
+      </main>
+    </div>
+  );
 }

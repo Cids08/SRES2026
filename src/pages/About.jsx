@@ -35,42 +35,28 @@ const STATS = [
 ══════════════════════════════════════════════════════════ */
 export default function History() {
     return (
-        <div className="bg-white">
+        <div style={{ background: "#f2efe8", minHeight: "100vh" }}>
 
-            {/* ── 1. PAGE HEADER ───────────────────────────────────── */}
+            {/* ── HERO ─────────────────────────────────────────── */}
             <section className="relative overflow-hidden" style={{ minHeight: 340 }}>
-                {/* Left half — navy */}
+                {/* Left navy half */}
                 <div className="absolute inset-0 bg-[#0a1f52]" />
 
-                {/* Right half — real photo, clipped diagonally */}
+                {/* Right photo, clipped diagonally */}
                 <div
                     className="absolute right-0 top-0 h-full w-3/5"
                     style={{ clipPath: "polygon(12% 0, 100% 0, 100% 100%, 0% 100%)" }}
                 >
-                    <img
-                        src={IMAGES.hero}
-                        alt="SRES Campus"
-                        className="w-full h-full object-cover"
-                    />
-                    {/* Gradient fade so photo blends into navy on the left edge */}
-                    <div
-                        className="absolute inset-0"
-                        style={{ background: "linear-gradient(to right, #0a1f52 0%, transparent 40%)" }}
-                    />
-                    {/* Dark tint on photo */}
+                    <img src={IMAGES.hero} alt="SRES Staff" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to right, #0a1f52 0%, transparent 40%)" }} />
                     <div className="absolute inset-0 bg-[#0a1f52]/45" />
                 </div>
 
-                {/* Yellow bottom stripe */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-700 via-yellow-400 to-yellow-700 z-10" />
-
-                {/* Content */}
-                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-24">
-
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-8">
-                        <div>
-                            <p className="text-yellow-400 text-[11px] font-extrabold uppercase tracking-[0.2em] mb-3">
-                                San Roque Elementary School
+                {/* Content — left-aligned, flex column, same as About */}
+                    <div style={{ position: "relative", zIndex: 1, maxWidth: 1280, margin: "0 auto", padding: "80px 24px 96px" }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                            <p style={{ color: "#facc15", fontSize: 11, fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", margin: "0 0 12px 0" }}>
+                            San Roque Elementary School
                             </p>
                             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-none mb-5">
                                 About <span className="text-yellow-400">Us</span>
@@ -81,7 +67,6 @@ export default function History() {
                             </p>
                         </div>
                     </div>
-                </div>
             </section>
 
             {/* ── 2. INTRO + STATS ─────────────────────────────────── */}

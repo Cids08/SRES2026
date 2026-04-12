@@ -3,259 +3,219 @@ import { useState } from "react";
 const HERO_IMG = "/images/hero-img-1-min.jpg";
 
 const CATEGORIES = [
-    { key: "all",         label: "All Announcements" },
-    { key: "enrollment",  label: "Enrollment" },
-    { key: "achievement", label: "Achievements" },
-    { key: "general",     label: "General" },
+  { key: "all",         label: "All"          },
+  { key: "enrollment",  label: "Enrollment"   },
+  { key: "achievement", label: "Achievements" },
+  { key: "general",     label: "General"      },
 ];
 
-const IMPORTANCE_STYLES = {
-    high:   { badge: "bg-red-100 text-red-700 border-red-200",    border: "border-l-red-500",    label: "High"   },
-    medium: { badge: "bg-orange-100 text-orange-700 border-orange-200", border: "border-l-orange-500", label: "Medium" },
-    low:    { badge: "bg-emerald-100 text-emerald-700 border-emerald-200", border: "border-l-emerald-500", label: "Low" },
+const PRIORITY = {
+  high:   { label: "Action Required", bar: "#c0392b" },
+  medium: { label: "Please Note",     bar: "#e67e00" },
+  low:    { label: "Info",            bar: "#0a6640" },
 };
 
 const ANNOUNCEMENTS = [
-    {
-        id: 1,
-        category: "enrollment",
-        importance: "high",
-        title: "Fall 2025 Enrollment Now Open",
-        summary: "Registration for the Fall 2025 semester is now open. Secure your spot by submitting your application before May 15, 2025.",
-        date: "April 1, 2025",
-        details: {
-            heading: "Fall 2025 Enrollment Details",
-            items: [
-                "Application deadline: May 15, 2025",
-                "Required documents: Transcripts, ID, Proof of residence",
-                "Application fee waived for returning students",
-                "Limited seats available for all programs",
-                "Early bird discount of 10% for applications submitted before April 30",
-                "Online applications preferred through the student portal",
-            ],
-        },
+  {
+    id: 1, category: "enrollment", importance: "high",
+    title: "Fall 2025 Enrollment Now Open",
+    summary: "Registration for the Fall 2025 semester is now open. Secure your child's spot by submitting your application before May 15, 2025.",
+    date: "April 1, 2025",
+    details: {
+      items: [
+        "Application deadline: May 15, 2025",
+        "Required documents: Transcripts, valid ID, Proof of residence",
+        "Application fee waived for returning students",
+        "Limited seats — early applications are encouraged",
+        "Early bird discount of 10% for applications before April 30",
+        "Online applications preferred through the student portal",
+      ],
     },
-    {
-        id: 2,
-        category: "enrollment",
-        importance: "medium",
-        title: "Scholarship Applications",
-        summary: "Merit-based and need-based scholarship applications for the upcoming academic year are now being accepted.",
-        date: "March 25, 2025",
-        details: {
-            heading: "Scholarship Information",
-            body: "Application deadline is April 30, 2025. The following scholarships are available:",
-            items: [
-                "Academic Excellence Scholarship: For students with GPA 3.8 or higher",
-                "Leadership Scholarship: For students with demonstrated leadership experience",
-                "Community Service Award: For students with 100+ volunteer hours",
-                "Need-based Financial Aid: Based on family income verification",
-            ],
-            footer: "All applications require two recommendation letters and a personal statement.",
-        },
+  },
+  {
+    id: 2, category: "enrollment", importance: "medium",
+    title: "Scholarship Applications Open",
+    summary: "Merit-based and need-based scholarship applications for the upcoming academic year are now being accepted. Deadline is April 30, 2025.",
+    date: "March 25, 2025",
+    details: {
+      body: "The following scholarships are available for qualified applicants:",
+      items: [
+        "Academic Excellence Scholarship — GPA 3.8 or higher",
+        "Leadership Scholarship — demonstrated leadership experience",
+        "Community Service Award — 100+ verified volunteer hours",
+        "Need-based Financial Aid — family income verification required",
+      ],
+      footer: "All applications require two recommendation letters and a personal statement.",
     },
-    {
-        id: 3,
-        category: "achievement",
-        importance: "medium",
-        title: "National Science Competition Winners",
-        summary: "Congratulations to our Science Club for securing the first place in the National Science Competition 2025!",
-        date: "March 28, 2025",
-        details: {
-            heading: "National Science Competition Victory",
-            body: "Our school's Science Club has won first place in the prestigious National Science Competition with their innovative project on renewable energy solutions. The team will represent our school at the International Science Fair in June. A celebration event will be held in the auditorium on April 10th at 3:30 PM.",
-        },
+  },
+  {
+    id: 3, category: "achievement", importance: "medium",
+    title: "National Science Competition — 1st Place",
+    summary: "Congratulations to our Science Club for securing first place in the National Science Competition 2025 with their project on renewable energy.",
+    date: "March 28, 2025",
+    details: {
+      body: "Our Science Club won first place in the prestigious National Science Competition. The team will represent our school at the International Science Fair in June. A celebration will be held in the auditorium on April 10th at 3:30 PM — all parents and students are welcome to attend.",
     },
-    {
-        id: 4,
-        category: "achievement",
-        importance: "low",
-        title: "Arts Festival Recognition",
-        summary: "Our school's Art Department received an honorable mention at the Regional Arts Festival for the innovative mixed media display.",
-        date: "March 20, 2025",
-        details: {
-            heading: "Arts Festival Achievement",
-            body: "The Art Department's mixed media installation titled 'Perspectives on Climate' received an honorable mention at this year's Regional Arts Festival. The collaborative project featured work from 15 students across all grade levels. The installation will be on display in the school gallery until April 15th.",
-        },
+  },
+  {
+    id: 4, category: "achievement", importance: "low",
+    title: "Arts Festival Honorable Mention",
+    summary: "Our Art Department received an honorable mention at the Regional Arts Festival for the mixed media installation 'Perspectives on Climate.'",
+    date: "March 20, 2025",
+    details: {
+      body: "The collaborative installation featured work from 15 students across all grade levels. It will remain on display in the school gallery until April 15th. We invite everyone to visit and celebrate the creativity of our young artists.",
     },
-    {
-        id: 5,
-        category: "general",
-        importance: "high",
-        title: "Campus Maintenance Schedule",
-        summary: "The main building will undergo maintenance from April 10–15, 2025. All classes normally held in the main building will be relocated.",
-        date: "March 30, 2025",
-        details: {
-            heading: "Maintenance Schedule & Room Assignments",
-            body: "During the maintenance period (April 10–15), the following relocations will be in effect:",
-            items: [
-                "All 100-series classrooms → Science Building, rooms S101–S110",
-                "All 200-series classrooms → Library study rooms",
-                "Administrative offices → Conference Center",
-            ],
-            footer: "Maintenance includes HVAC upgrades, electrical repairs, and Wi-Fi infrastructure improvements.",
-        },
+  },
+  {
+    id: 5, category: "general", importance: "high",
+    title: "Main Building Maintenance — April 10–15",
+    summary: "The main building will undergo scheduled maintenance from April 10–15, 2025. All affected classes will be temporarily relocated.",
+    date: "March 30, 2025",
+    details: {
+      body: "During the maintenance period, the following relocations will be in effect:",
+      items: [
+        "100-series classrooms → Science Building, rooms S101–S110",
+        "200-series classrooms → Library study rooms",
+        "Administrative offices → Conference Center",
+      ],
+      footer: "Maintenance covers HVAC upgrades, electrical repairs, and Wi-Fi infrastructure improvements.",
     },
-    {
-        id: 6,
-        category: "general",
-        importance: "low",
-        title: "Library Extended Hours",
-        summary: "During the exam period (April 20–30), the library will be open from 7:00 AM to 10:00 PM on weekdays.",
-        date: "March 27, 2025",
-        details: {
-            heading: "Extended Library Hours & Services",
-            items: [
-                "Weekdays: 7:00 AM – 10:00 PM",
-                "Weekends: 9:00 AM – 8:00 PM",
-                "Additional group study rooms (reservation required)",
-                "Extended laptop lending up to 48 hours",
-                "Free printing up to 50 pages per student",
-                "Librarians available for research assistance until 8:00 PM daily",
-            ],
-        },
+  },
+  {
+    id: 6, category: "general", importance: "low",
+    title: "Extended Library Hours — Exam Period",
+    summary: "The library will be open from 7:00 AM to 10:00 PM on weekdays during the exam period (April 20–30).",
+    date: "March 27, 2025",
+    details: {
+      items: [
+        "Weekdays: 7:00 AM – 10:00 PM",
+        "Weekends: 9:00 AM – 8:00 PM",
+        "Group study rooms available (reservation required)",
+        "Extended laptop lending up to 48 hours",
+        "Free printing up to 50 pages per student",
+        "Librarians available for research help until 8:00 PM",
+      ],
     },
+  },
 ];
 
+function PriorityFlag({ importance }) {
+  const p = PRIORITY[importance];
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 9, fontWeight: 800, letterSpacing: "0.16em", textTransform: "uppercase", padding: "3px 10px", border: `1.5px solid ${p.bar}`, color: p.bar, background: `${p.bar}12` }}>
+      <span style={{ width: 6, height: 6, background: p.bar, display: "inline-block" }} />
+      {p.label}
+    </span>
+  );
+}
+
 function AnnouncementCard({ item }) {
-    const [open, setOpen] = useState(false);
-    const style = IMPORTANCE_STYLES[item.importance];
-
-    return (
-        <div className={`bg-white rounded-2xl border border-gray-100 border-l-4 ${style.border} shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden`}>
-            <div className="p-6">
-                {/* Header row */}
-                <div className="flex items-start justify-between gap-4 flex-wrap mb-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${style.badge}`}>
-                            {style.label} Priority
-                        </span>
-                        <h3 className="text-[#0a1f52] font-bold text-base leading-snug">{item.title}</h3>
-                    </div>
-                </div>
-
-                <p className="text-gray-500 text-sm leading-relaxed mb-4">{item.summary}</p>
-
-                <div className="flex items-center justify-between flex-wrap gap-3">
-                    <span className="text-gray-400 text-xs">Posted on: {item.date}</span>
-                    <button
-                        onClick={() => setOpen(!open)}
-                        className="text-[11px] font-extrabold uppercase tracking-wide px-4 py-2 rounded-full bg-[#0a1f52] text-white hover:bg-[#1a3a8a] transition-colors duration-200"
-                    >
-                        {open ? "Hide Details" : "View Details"}
-                    </button>
-                </div>
-            </div>
-
-            {/* Expandable details */}
-            {open && (
-                <div className="border-t border-gray-100 bg-[#f4f6fb] px-6 py-5">
-                    <p className="text-[11px] font-extrabold uppercase tracking-widest text-[#0a1f52] mb-3">{item.details.heading}</p>
-                    {item.details.body && (
-                        <p className="text-sm text-gray-600 leading-relaxed mb-3">{item.details.body}</p>
-                    )}
-                    {item.details.items && (
-                        <ul className="space-y-1.5 mb-3">
-                            {item.details.items.map((d) => (
-                                <li key={d} className="text-sm text-gray-600 flex items-start gap-2">
-                                    <span className="text-yellow-500 mt-0.5 flex-shrink-0">★</span> {d}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                    {item.details.footer && (
-                        <p className="text-sm text-gray-500 italic mt-2">{item.details.footer}</p>
-                    )}
-                </div>
-            )}
+  const [open, setOpen] = useState(false);
+  const p = PRIORITY[item.importance];
+  return (
+    <article style={{ background: "#fff", border: "1.5px solid #0a1f52", overflow: "hidden" }}>
+      <div style={{ display: "flex" }}>
+        <div style={{ width: 5, background: p.bar, flexShrink: 0 }} />
+        <div style={{ flex: 1, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
+          <PriorityFlag importance={item.importance} />
+          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "#0a1f52", lineHeight: 1.3, fontFamily: "Georgia, serif" }}>{item.title}</h3>
+          <p style={{ margin: 0, fontSize: 13, color: "#3a3a3a", lineHeight: 1.75, fontFamily: "Georgia, serif" }}>{item.summary}</p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 10, borderTop: "1px solid #e4e0d4", marginTop: "auto", flexWrap: "wrap", gap: 8 }}>
+            <time style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#0a1f52", opacity: 0.45 }}>Posted: {item.date}</time>
+            <button onClick={() => setOpen(!open)} style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", padding: "6px 14px", border: "1.5px solid #0a1f52", cursor: "pointer", background: open ? "#0a1f52" : "transparent", color: open ? "#f5c518" : "#0a1f52", transition: "all 0.15s" }}>
+              {open ? "Close" : "See Details"}
+            </button>
+          </div>
         </div>
-    );
+      </div>
+      {open && (
+        <div style={{ borderTop: "1.5px solid #0a1f52", background: "#0a1f52", padding: "18px 20px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+          {item.details.body && <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.82)", lineHeight: 1.8, fontFamily: "Georgia, serif" }}>{item.details.body}</p>}
+          {item.details.items && (
+            <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 7 }}>
+              {item.details.items.map((d, i) => (
+                <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 13, color: "rgba(255,255,255,0.82)", fontFamily: "Georgia, serif", lineHeight: 1.5 }}>
+                  <span style={{ width: 10, height: 10, background: "#f5c518", flexShrink: 0, marginTop: 3 }} />{d}
+                </li>
+              ))}
+            </ul>
+          )}
+          {item.details.footer && <p style={{ margin: 0, fontSize: 12, color: "rgba(245,197,24,0.75)", lineHeight: 1.7, fontStyle: "italic", borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 10 }}>{item.details.footer}</p>}
+        </div>
+      )}
+    </article>
+  );
 }
 
 export default function Announcement() {
-    const [active, setActive] = useState("all");
+  const [active, setActive] = useState("all");
+  const filtered = active === "all" ? ANNOUNCEMENTS : ANNOUNCEMENTS.filter((a) => a.category === active);
 
-    const filtered = active === "all" ? ANNOUNCEMENTS : ANNOUNCEMENTS.filter((a) => a.category === active);
+  return (
+    <div style={{ background: "#f2efe8", minHeight: "100vh" }}>
 
-    return (
-        <div className="bg-[#f4f6fb]">
-
-            {/* ── HERO ── */}
-            <section className="relative overflow-hidden" style={{ minHeight: 340 }}>
-                <div className="absolute inset-0 bg-[#0a1f52]" />
-                <div
-                    className="absolute right-0 top-0 h-full w-3/5"
-                    style={{ clipPath: "polygon(12% 0, 100% 0, 100% 100%, 0% 100%)" }}
-                >
-                    <img src={HERO_IMG} alt="Announcements" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0" style={{ background: "linear-gradient(to right, #0a1f52 0%, transparent 40%)" }} />
-                    <div className="absolute inset-0 bg-[#0a1f52]/45" />
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-700 via-yellow-400 to-yellow-700 z-10" />
-                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-24">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-8">
-                        <div>
-                            <p className="text-yellow-400 text-[11px] font-extrabold uppercase tracking-[0.2em] mb-3">
-                                San Roque Elementary School
-                            </p>
-                            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-none mb-5">
-                                Updates &amp; <span className="text-yellow-400">Notices</span>
-                            </h1>
-                            <p className="text-white/55 text-[15px] leading-relaxed max-w-md">
-                                Get the latest information on school activities, achievements, and
-                                important reminders. Stay connected with our school community!
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ── CONTENT ── */}
-            <section className="py-16 sm:py-24">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6">
-
-                    {/* Filter tabs */}
-                    <div className="flex flex-wrap gap-2 mb-10">
-                        {CATEGORIES.map((c) => (
-                            <button
-                                key={c.key}
-                                onClick={() => setActive(c.key)}
-                                className={`text-[11px] font-extrabold uppercase tracking-widest px-5 py-2.5 rounded-full border transition-all duration-200 ${
-                                    active === c.key
-                                        ? "bg-[#0a1f52] text-white border-[#0a1f52]"
-                                        : "bg-white text-[#0a1f52] border-gray-200 hover:border-[#0a1f52]"
-                                }`}
-                            >
-                                {c.label}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Announcements list */}
-                    <div className="space-y-5">
-                        {filtered.map((item) => (
-                            <AnnouncementCard key={item.id} item={item} />
-                        ))}
-                        {filtered.length === 0 && (
-                            <p className="text-center text-gray-400 py-12 text-sm">No announcements in this category yet.</p>
-                        )}
-                    </div>
-
-                    {/* Legend */}
-                    <div className="mt-10 bg-white rounded-2xl border border-gray-100 px-6 py-5">
-                        <p className="text-[11px] font-extrabold uppercase tracking-widest text-[#0a1f52] mb-3">Priority Guide</p>
-                        <div className="flex flex-wrap gap-4">
-                            {Object.entries(IMPORTANCE_STYLES).map(([key, s]) => (
-                                <span key={key} className={`text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${s.badge}`}>
-                                    {s.label} Priority
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-
-                </div>
-            </section>
-
+      {/* ── HERO ── */}
+      <section style={{ background: "#0a1f52", position: "relative", overflow: "hidden", minHeight: 340 }}>
+        <div style={{ position: "absolute", right: 0, top: 0, width: "60%", height: "100%", clipPath: "polygon(12% 0, 100% 0, 100% 100%, 0% 100%)" }}>
+          <img src={HERO_IMG} alt="SRES Campus" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, #0a1f52 0%, transparent 40%)" }} />
+          <div style={{ position: "absolute", inset: 0, background: "rgba(10,31,82,0.45)" }} />
         </div>
-    );
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: "linear-gradient(to right, #92400e, #facc15, #92400e)", zIndex: 10 }} />
+
+        {/* Content — left-aligned, flex column, same as About */}
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 1280, margin: "0 auto", padding: "80px 24px 96px" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+            <p style={{ color: "#facc15", fontSize: 11, fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", margin: "0 0 12px 0" }}>
+              San Roque Elementary School
+            </p>
+            <h1 style={{ margin: "0 0 20px 0", color: "#fff", fontSize: "clamp(2.8rem, 6vw, 4.5rem)", fontWeight: 800, lineHeight: 1, letterSpacing: "-0.02em" }}>
+              Notices &amp; <span style={{ color: "#facc15" }}>Updates</span>
+            </h1>
+            <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 15, lineHeight: 1.7, maxWidth: 448, margin: 0 }}>
+              Important announcements for students, parents, and faculty of San Roque Elementary School.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── TABS ── */}
+      <nav style={{ background: "#0a1f52", borderBottom: "4px solid #f5c518" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 40px", display: "flex" }}>
+          {CATEGORIES.map((c) => (
+            <button key={c.key} onClick={() => setActive(c.key)} style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.15em", textTransform: "uppercase", padding: "13px 20px", border: "none", cursor: "pointer", background: active === c.key ? "#f5c518" : "transparent", color: active === c.key ? "#0a1f52" : "rgba(255,255,255,0.48)", transition: "all 0.15s" }}>
+              {c.label}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {/* ── CONTENT ── */}
+      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "44px 40px 72px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
+          <div style={{ width: 4, height: 18, background: "#f5c518" }} />
+          <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.22em", textTransform: "uppercase", color: "#0a1f52" }}>{filtered.length} {filtered.length === 1 ? "Notice" : "Notices"}</span>
+          <div style={{ flex: 1, height: 1, background: "#0a1f52", opacity: 0.1 }} />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {filtered.map((item) => <AnnouncementCard key={item.id} item={item} />)}
+          {filtered.length === 0 && (
+            <div style={{ border: "1.5px solid #0a1f52", padding: "60px 24px", textAlign: "center", background: "#fff" }}>
+              <p style={{ fontSize: 14, color: "#0a1f52", opacity: 0.38, fontFamily: "Georgia, serif", margin: 0 }}>No announcements in this category yet.</p>
+            </div>
+          )}
+        </div>
+        <div style={{ marginTop: 36, padding: "14px 18px", border: "1.5px solid #0a1f52", background: "#fff" }}>
+          <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "#0a1f52", opacity: 0.45, display: "block", marginBottom: 10 }}>Priority Guide</span>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            {Object.entries(PRIORITY).map(([key, p]) => (
+              <span key={key} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 9, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", padding: "3px 10px", border: `1.5px solid ${p.bar}`, color: p.bar, background: `${p.bar}12` }}>
+                <span style={{ width: 6, height: 6, background: p.bar, display: "inline-block" }} />{p.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 }
