@@ -23,7 +23,8 @@ export default function Maintenance({ pageName = "This page" }) {
             <div style={{ width: "100%", maxWidth: 520, textAlign: "center" }}>
 
                 <div style={{ width: 90, height: 90, borderRadius: "50%", background: NAV, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px", boxShadow: "0 8px 32px rgba(10,31,82,0.18)" }}>
-                    <svg width={40} height={40} viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+                    <svg width={40} height={40} viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round"
+                        style={{ animation: "spin 3s linear infinite" }}>
                         <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
                     </svg>
                 </div>
@@ -100,10 +101,14 @@ export default function Maintenance({ pageName = "This page" }) {
                 )}
 
                 <style>{`
+                    @keyframes spin {
+                        from { transform: rotate(0deg); }
+                        to   { transform: rotate(360deg); }
+                    }
                     @keyframes progress {
-                        0%   { width: 0%;    margin-left: 0; }
-                        50%  { width: 100%;  margin-left: 0; }
-                        100% { width: 0%;    margin-left: 100%; }
+                        0%   { width: 0%;   margin-left: 0; }
+                        50%  { width: 100%; margin-left: 0; }
+                        100% { width: 0%;   margin-left: 100%; }
                     }
                 `}</style>
             </div>
