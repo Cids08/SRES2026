@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const HERO_IMG = "/images/hero-img-1-min.jpg";
+const API_URL  = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
 
 const SENDER_TYPES = [
   { key: "parent",  label: "Parent / Guardian" },
@@ -63,10 +64,10 @@ const OFFICES = [
 ];
 
 const QUICK_LINKS = [
-  { label: "Go to Online Enrollment Form",         href: "/enroll"                              },
-  { label: "DepEd Schools Division — Catanduanes", href: "https://catanduanes.deped.gov.ph"     },
-  { label: "DepEd Official Website",               href: "https://www.deped.gov.ph"             },
-  { label: "Request Form 137 / Transfer Docs",     href: "#contact-form"                        },
+  { label: "Go to Online Enrollment Form",         href: "/enroll"                          },
+  { label: "DepEd Schools Division — Catanduanes", href: "https://catanduanes.deped.gov.ph" },
+  { label: "DepEd Official Website",               href: "https://www.deped.gov.ph"         },
+  { label: "Request Form 137 / Transfer Docs",     href: "#contact-form"                    },
 ];
 
 const INPUT_STYLE = {
@@ -88,16 +89,32 @@ function FieldWrap({ label, error, required, children }) {
 }
 
 function ContactForm() {
-  const [step, setStep] = useState(1);
+  const [step,       setStep]       = useState(1);
   const [senderType, setSenderType] = useState("");
-  const [form, setForm] = useState({ name: "", email: "", gradeSection: "", subject: "", message: "" });
-  const [errors, setErrors] = useState({});
-  const [submitted, setSubmitted] = useState(false);
+  const [form,       setForm]       = useState({
+    name: "", email: "", gradeSection: "",
+    subject: "", message: "",
+    honeypot: "", // hidden bot trap — never shown to real users
+  });
+  const [errors,     setErrors]     = useState({});
+  const [submitted,  setSubmitted]  = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [apiError,   setApiError]   = useState("");
 
-  function choose(key) { setSenderType(key); setStep(2); }
+  // Records when the form was opened — bots submit instantly
+  const formOpenedAt = useRef(Date.now());
+
+  function choose(key) {
+    // Reset the timer each time user reaches step 2
+    formOpenedAt.current = Date.now();
+    setSenderType(key);
+    setStep(2);
+  }
+
   function change(e) {
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
-    setErrors((er) => ({ ...er, [e.target.name]: undefined }));
+    setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+    setErrors(er => ({ ...er, [e.target.name]: undefined }));
+    setApiError("");
   }
 
   function validate() {
@@ -106,14 +123,63 @@ function ContactForm() {
     if (!form.email.trim())   e.email   = "Email is required.";
     if (!form.subject)        e.subject = "Please select a subject.";
     if (!form.message.trim()) e.message = "Message is required.";
+    if (form.message.trim().length < 10) e.message = "Message is too short.";
     return e;
   }
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
     const er = validate();
     if (Object.keys(er).length) { setErrors(er); return; }
-    setSubmitted(true);
+
+    // ── Bot check: submitted too fast (under 3 seconds) ──
+    if (Date.now() - formOpenedAt.current < 3000) {
+      setSubmitted(true); // fake success — don't reveal the block
+      return;
+    }
+
+    // ── Bot check: honeypot was filled ──
+    // We still send to server but server will also silently reject it.
+    // This client-side check is just an extra layer.
+    if (form.honeypot) {
+      setSubmitted(true); // fake success
+      return;
+    }
+
+    setSubmitting(true);
+    setApiError("");
+    try {
+      const res = await fetch(`${API_URL}/contact`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          honeypot:      form.honeypot,        // bot trap field
+          sender_type:   senderType,
+          name:          form.name,
+          email:         form.email,
+          grade_section: form.gradeSection || null,
+          subject:       form.subject,
+          message:       form.message,
+        }),
+      });
+
+      const ct = res.headers.get("content-type") || "";
+      if (!ct.includes("application/json")) throw new Error("Server error. Please try again.");
+
+      // ── Rate limit hit ──
+      if (res.status === 429) {
+        throw new Error("You've sent too many messages. Please wait an hour before trying again.");
+      }
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Something went wrong. Please try again.");
+
+      setSubmitted(true);
+    } catch (err) {
+      setApiError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (submitted) {
@@ -137,7 +203,14 @@ function ContactForm() {
             For urgent concerns, please visit the school office in person or call us directly.
           </p>
           <button
-            onClick={() => { setSubmitted(false); setStep(1); setSenderType(""); setForm({ name: "", email: "", gradeSection: "", subject: "", message: "" }); }}
+            onClick={() => {
+              setSubmitted(false);
+              setStep(1);
+              setSenderType("");
+              setForm({ name: "", email: "", gradeSection: "", subject: "", message: "", honeypot: "" });
+              setApiError("");
+              formOpenedAt.current = Date.now();
+            }}
             style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", padding: "9px 20px", background: "#0a1f52", color: "#f5c518", border: "none", cursor: "pointer" }}
           >
             Send Another Message
@@ -161,13 +234,13 @@ function ContactForm() {
             Please identify yourself so we can direct your message to the right person.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-            {SENDER_TYPES.map((s) => (
+            {SENDER_TYPES.map(s => (
               <button
                 key={s.key}
                 onClick={() => choose(s.key)}
                 style={{ all: "unset", cursor: "pointer", padding: "18px 16px", border: "1.5px solid #0a1f52", background: "#fdfcf8", display: "flex", flexDirection: "column", gap: 4, transition: "all 0.15s" }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#0a1f52"; e.currentTarget.querySelector("span").style.color = "#f5c518"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "#fdfcf8"; e.currentTarget.querySelector("span").style.color = "#0a1f52"; }}
+                onMouseEnter={e => { e.currentTarget.style.background = "#0a1f52"; e.currentTarget.querySelector("span").style.color = "#f5c518"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "#fdfcf8"; e.currentTarget.querySelector("span").style.color = "#0a1f52"; }}
               >
                 <span style={{ fontSize: 14, fontWeight: 800, color: "#0a1f52", fontFamily: "Georgia, serif", transition: "color 0.15s" }}>
                   {s.label}
@@ -180,8 +253,8 @@ function ContactForm() {
     );
   }
 
-  const sender = SENDER_TYPES.find((s) => s.key === senderType);
-  const subjects = SUBJECTS[senderType] || [];
+  const sender      = SENDER_TYPES.find(s => s.key === senderType);
+  const subjects    = SUBJECTS[senderType] || [];
   const showSection = senderType === "student" || senderType === "parent";
 
   return (
@@ -190,24 +263,29 @@ function ContactForm() {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 4, height: 16, background: "#f5c518" }} />
           <div>
-            <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(245,197,24,0.7)", display: "block" }}>
-              Sending as
-            </span>
-            <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", color: "#fff" }}>
-              {sender?.label}
-            </span>
+            <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(245,197,24,0.7)", display: "block" }}>Sending as</span>
+            <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", color: "#fff" }}>{sender?.label}</span>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setStep(1)}
-          style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", padding: "5px 12px", border: "1px solid rgba(255,255,255,0.25)", background: "transparent", color: "rgba(255,255,255,0.55)", cursor: "pointer" }}
-        >
+        <button type="button" onClick={() => setStep(1)}
+          style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", padding: "5px 12px", border: "1px solid rgba(255,255,255,0.25)", background: "transparent", color: "rgba(255,255,255,0.55)", cursor: "pointer" }}>
           ← Change
         </button>
       </div>
 
       <div style={{ padding: "24px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
+
+        {/* ── Honeypot — invisible to humans, bots will fill it ── */}
+        <input
+          name="honeypot"
+          value={form.honeypot}
+          onChange={change}
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          style={{ display: "none" }}
+        />
+
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14 }}>
           <FieldWrap label="Full Name" error={errors.name} required>
             <input name="name" type="text" value={form.name} onChange={change} placeholder="Juan dela Cruz"
@@ -227,38 +305,32 @@ function ContactForm() {
         )}
 
         <FieldWrap label="Subject / Concern" error={errors.subject} required>
-          <select
-            name="subject" value={form.subject} onChange={change}
-            style={{
-              ...INPUT_STYLE,
-              borderColor: errors.subject ? "#c0392b" : "#0a1f52",
-              appearance: "none",
-              backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%230a1f52' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\")",
-              backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center", paddingRight: 36,
-            }}
-          >
+          <select name="subject" value={form.subject} onChange={change}
+            style={{ ...INPUT_STYLE, borderColor: errors.subject ? "#c0392b" : "#0a1f52", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%230a1f52' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center", paddingRight: 36 }}>
             <option value="">— Select a subject —</option>
-            {subjects.map((s) => <option key={s} value={s}>{s}</option>)}
+            {subjects.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </FieldWrap>
 
         <FieldWrap label="Your Message" error={errors.message} required>
-          <textarea
-            name="message" rows={5} value={form.message} onChange={change}
+          <textarea name="message" rows={5} value={form.message} onChange={change}
             placeholder="Please describe your concern or inquiry in detail..."
-            style={{ ...INPUT_STYLE, resize: "vertical", borderColor: errors.message ? "#c0392b" : "#0a1f52" }}
-          />
+            style={{ ...INPUT_STYLE, resize: "vertical", borderColor: errors.message ? "#c0392b" : "#0a1f52" }} />
         </FieldWrap>
+
+        {apiError && (
+          <div style={{ background: "#fef0f0", border: "1.5px solid #c0392b", padding: "10px 14px", fontSize: 12, color: "#c0392b", fontWeight: 700, fontFamily: "Georgia, serif" }}>
+            {apiError}
+          </div>
+        )}
 
         <p style={{ margin: 0, fontSize: 12, color: "#666", fontFamily: "Georgia, serif", lineHeight: 1.7, borderTop: "1px solid #e4e0d4", paddingTop: 12 }}>
           We typically respond within <strong>1–2 school days</strong>. For urgent matters, please visit the school office in person or call us directly.
         </p>
 
-        <button
-          type="submit"
-          style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.16em", textTransform: "uppercase", padding: "14px", background: "#0a1f52", color: "#f5c518", border: "none", cursor: "pointer", width: "100%", transition: "background 0.15s" }}
-        >
-          Submit Message
+        <button type="submit" disabled={submitting}
+          style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.16em", textTransform: "uppercase", padding: "14px", background: submitting ? "#8a9ab5" : "#0a1f52", color: "#f5c518", border: "none", cursor: submitting ? "not-allowed" : "pointer", width: "100%", transition: "background 0.15s" }}>
+          {submitting ? "Sending…" : "Submit Message"}
         </button>
       </div>
     </form>
@@ -301,7 +373,7 @@ export default function Contact() {
             { key: "School Hours", main: "Mon – Fri",           sub: "7:00 AM – 5:00 PM"        },
             { key: "Email",        main: "113330@deped.gov.ph", sub: null                        },
             { key: "Phone",        main: "+63 9605519104",      sub: null                        },
-          ].map((i) => (
+          ].map(i => (
             <div key={i.key} style={{ background: "#0a1f52", padding: "18px 20px", display: "flex", flexDirection: "column", gap: 4 }}>
               <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", color: "#f5c518" }}>{i.key}</span>
               <span style={{ fontSize: 14, fontWeight: 700, color: "#fff", fontFamily: "Georgia, serif", wordBreak: "break-all" }}>{i.main}</span>
@@ -320,9 +392,7 @@ export default function Contact() {
             <div style={{ border: "1.5px solid #0a1f52", background: "#fff", overflow: "hidden" }}>
               <div style={{ background: "#0a1f52", padding: "14px 18px", display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ width: 4, height: 16, background: "#f5c518" }} />
-                <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "#fff" }}>
-                  Who to Approach
-                </span>
+                <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "#fff" }}>Who to Approach</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {OFFICES.map((o, i) => (
@@ -339,17 +409,13 @@ export default function Contact() {
             <div style={{ border: "1.5px solid #0a1f52", background: "#fff", overflow: "hidden" }}>
               <div style={{ background: "#0a1f52", padding: "14px 18px", display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ width: 4, height: 16, background: "#f5c518" }} />
-                <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "#fff" }}>
-                  Quick Links
-                </span>
+                <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "#fff" }}>Quick Links</span>
               </div>
               {QUICK_LINKS.map((l, i) => (
-                <a
-                  key={i} href={l.href}
+                <a key={i} href={l.href}
                   style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 18px", textDecoration: "none", borderBottom: i < QUICK_LINKS.length - 1 ? "1px solid #e4e0d4" : "none", fontSize: 12.5, fontWeight: 700, color: "#0a1f52", fontFamily: "Georgia, serif", transition: "background 0.12s" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f5c518"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
-                >
+                  onMouseEnter={e => { e.currentTarget.style.background = "#f5c518"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>
                   {l.label}
                   <span style={{ fontSize: 14, color: "#0a1f52", opacity: 0.4, flexShrink: 0, marginLeft: 8 }}>→</span>
                 </a>
@@ -358,9 +424,7 @@ export default function Contact() {
 
             {/* Public school notice */}
             <div style={{ background: "#fffbea", border: "1.5px solid #f5c518", padding: "14px 18px" }}>
-              <p style={{ margin: "0 0 6px", fontSize: 9, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "#92400e" }}>
-                Public School Notice
-              </p>
+              <p style={{ margin: "0 0 6px", fontSize: 9, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "#92400e" }}>Public School Notice</p>
               <p style={{ margin: 0, fontSize: 12.5, color: "#78350f", fontFamily: "Georgia, serif", lineHeight: 1.7 }}>
                 San Roque Elementary School is a <strong>free public school</strong> under the Department of Education (DepEd). We do not collect tuition or enrollment fees. For concerns about DepEd policies or school governance, you may also contact the <strong>Schools Division of Catanduanes</strong>.
               </p>
@@ -370,20 +434,11 @@ export default function Contact() {
             <div style={{ border: "1.5px solid #0a1f52", overflow: "hidden" }}>
               <div style={{ background: "#0a1f52", padding: "14px 18px", display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ width: 4, height: 16, background: "#f5c518" }} />
-                <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "#fff" }}>
-                  Find Us
-                </span>
+                <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "#fff" }}>Find Us</span>
               </div>
-              <iframe
-                title="SRES Location"
-                src="https://maps.google.com/maps?q=Viga,+Catanduanes&output=embed"
-                width="100%" height="180"
-                style={{ border: 0, display: "block" }}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
+              <iframe title="SRES Location" src="https://maps.google.com/maps?q=Viga,+Catanduanes&output=embed"
+                width="100%" height="180" style={{ border: 0, display: "block" }} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
             </div>
-
           </div>
         </div>
       </main>

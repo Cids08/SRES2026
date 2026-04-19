@@ -157,9 +157,8 @@ export default function Footer() {
                         </a>.
                     </p>
                 </div>
-                <Link to="/admin/login"
-                    className="text-white/20 hover:text-white/45 text-[11px] transition-colors whitespace-nowrap">
-                    Admin Login
+                <Link to="/admin/login" title="" aria-label="Admin">
+                    <span className="block w-2 h-2 rounded-full bg-white/10 hover:bg-white/25 transition-colors duration-300" />
                 </Link>
             </div>
         </footer>

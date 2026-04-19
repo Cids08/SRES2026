@@ -6,9 +6,8 @@ const NAV_LINKS = [
     { label: "Home",         path: "/"             },
     { label: "About Us",     path: "/history"      },
     { label: "Our Faculty",  path: "/staff"        },
-    { label: "News",         path: "/news"         },
-    { label: "Gallery",      path: "/gallery"      },
     { label: "Announcement", path: "/announcement" },
+    { label: "Gallery",      path: "/gallery"      },
     { label: "Contact Us",   path: "/contact"      },
 ];
 
@@ -17,10 +16,9 @@ export default function Navbar() {
     const [scrolled,   setScrolled]   = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [search,     setSearch]     = useState("");
-    const topBarRef = useRef(null);
+    const topBarRef      = useRef(null);
     const [topBarHeight, setTopBarHeight] = useState("auto");
 
-    // Measure the real height of the top bar on mount
     useEffect(() => {
         if (topBarRef.current) {
             setTopBarHeight(topBarRef.current.scrollHeight + "px");
@@ -29,18 +27,16 @@ export default function Navbar() {
 
     useEffect(() => {
         let rafId = null;
-        // Hysteresis: collapse when scrolling DOWN past 60px,
-        // re-expand only when scrolling back UP below 40px.
-        // This prevents flickering when hovering right at the boundary.
         const onScroll = () => {
             if (rafId) return;
             rafId = requestAnimationFrame(() => {
                 rafId = null;
                 const y = window.scrollY;
                 setScrolled(prev => {
-                    if (!prev && y > 60) return true;   // collapse
-                    if (prev  && y < 40) return false;  // re-expand
-                    return prev;                         // no change → no re-render
+                    const threshold = topBarRef.current?.scrollHeight ?? 60;
+                    if (!prev && y > threshold) return true;
+                    if (prev  && y < threshold - 20) return false;
+                    return prev;
                 });
             });
         };
@@ -51,6 +47,7 @@ export default function Navbar() {
         };
     }, []);
 
+    // Close mobile menu on route change
     useEffect(() => setMobileOpen(false), [location.pathname]);
 
     const isActive = (path) =>
@@ -63,148 +60,188 @@ export default function Navbar() {
     };
 
     return (
-        <header className="sticky top-0 z-50">
+        <>
+            <header className="sticky top-0 z-50">
 
-            {/* Gold stripe */}
-            <div className="h-[5px] bg-gradient-to-r from-yellow-700 via-yellow-400 to-yellow-700" />
+                {/* Gold stripe */}
+                <div className="h-[5px] bg-gradient-to-r from-yellow-700 via-yellow-400 to-yellow-700" />
 
-            {/*
-                Top bar — uses explicit height transition instead of max-h
-                so the collapse is perfectly smooth with no jump.
-                overflow-hidden clips content as height animates to 0.
-            */}
-            <div
-                ref={topBarRef}
-                style={{
-                    height: scrolled ? "0px" : topBarHeight,
-                    opacity: scrolled ? 0 : 1,
-                    // transition height AND opacity together, same duration/easing
-                    transition: "height 300ms cubic-bezier(0.4,0,0.2,1), opacity 300ms cubic-bezier(0.4,0,0.2,1)",
-                    overflow: "hidden",
-                }}
-                className="bg-[#0a1f52]"
-            >
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3 min-w-0">
-                        <img src="/images/logo.png" alt="SRES Logo"
-                            className="h-10 w-10 rounded-full object-cover border-2 border-yellow-500 bg-white p-0.5 flex-shrink-0" />
-                        <div className="min-w-0">
-                            <p className="text-white font-bold text-sm sm:text-[15px] leading-tight truncate">
-                                San Roque Elementary School
-                            </p>
-                            <p className="text-yellow-400 text-[10px] font-semibold tracking-widest uppercase mt-0.5 hidden sm:block">
-                                DepEd · Division of Catanduanes
-                            </p>
+                {/*
+                    TOP BAR
+                    — Mobile:  logo + school name + hamburger (all in one row, aligned)
+                    — Desktop: logo + name + enroll button, no hamburger
+                    — Collapses on scroll
+                */}
+                <div
+                    ref={topBarRef}
+                    style={{
+                        height: scrolled ? "0px" : topBarHeight,
+                        opacity: scrolled ? 0 : 1,
+                        transition: "height 300ms cubic-bezier(0.4,0,0.2,1), opacity 300ms cubic-bezier(0.4,0,0.2,1)",
+                        overflow: "hidden",
+                    }}
+                    className="bg-[#0a1f52]"
+                >
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-4">
+
+                        {/* Logo + school name */}
+                        <div className="flex items-center gap-3 min-w-0">
+                            <img src="/images/logo.png" alt="SRES Logo"
+                                className="h-10 w-10 rounded-full object-cover border-2 border-yellow-500 bg-white p-0.5 flex-shrink-0" />
+                            <div className="min-w-0">
+                                <p className="text-white font-bold text-sm sm:text-[15px] leading-tight truncate">
+                                    San Roque Elementary School
+                                </p>
+                                <p className="text-yellow-400 text-[10px] font-semibold tracking-widest uppercase mt-0.5 hidden sm:block">
+                                    DepEd · Division of Catanduanes
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* RIGHT SIDE */}
+                        <div className="flex items-center gap-3 flex-shrink-0">
+
+                            {/* Enroll Now — desktop/tablet only */}
+                            <div className="hidden sm:flex items-center gap-4">
+                                <span className="text-white/45 text-xs hidden lg:block">
+                                    Join with us and be a part of success
+                                </span>
+                                <Link to="/enroll"
+                                    className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-300 text-[#0a1f52] font-extrabold text-xs uppercase tracking-wider px-5 py-2.5 rounded-full transition-colors duration-200">
+                                    <PencilLine size={13} strokeWidth={2.5} />
+                                    Enroll Now
+                                </Link>
+                            </div>
+
+                            {/*
+                                Hamburger — mobile only, lives HERE in the top bar
+                                so it aligns naturally with the logo row.
+                                Hidden once scrolled (a second hamburger appears in the
+                                nav bar below for the scrolled state).
+                            */}
+                            <button
+                                onClick={() => setMobileOpen((o) => !o)}
+                                aria-label="Toggle navigation"
+                                aria-expanded={mobileOpen}
+                                className={`lg:hidden text-white p-2 rounded-lg active:bg-white/20 transition-all duration-300 ${scrolled ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                            >
+                                {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+                            </button>
                         </div>
                     </div>
-                    <div className="hidden sm:flex items-center gap-4 flex-shrink-0">
-                        <span className="text-white/45 text-xs hidden lg:block">
-                            Join with us and be a part of success
-                        </span>
-                        <Link to="/enroll"
-                            className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-[#0a1f52] font-extrabold text-xs uppercase tracking-wider px-5 py-2.5 rounded-full transition-colors duration-200">
-                            <PencilLine size={13} strokeWidth={2.5} />
-                            Enroll Now
+                </div>
+
+                {/* NAV BAR */}
+                <nav className="bg-[#0d2460] border-b border-yellow-600/30 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-stretch justify-between gap-2">
+
+                        {/* Scrolled mini brand */}
+                        <Link to="/" className={`flex items-center gap-2 font-bold text-sm flex-shrink-0 transition-all duration-300 ${scrolled ? "opacity-100 py-2 mr-3 w-auto" : "opacity-0 w-0 overflow-hidden pointer-events-none"}`}>
+                            <img src="/images/logo.png" alt="SRES"
+                                className="h-7 w-7 rounded-full object-cover border border-yellow-400 bg-white p-0.5" />
+                            <span className="text-yellow-400 whitespace-nowrap">SRES</span>
                         </Link>
-                    </div>
-                </div>
-            </div>
 
-            {/* Nav bar */}
-            <nav className="bg-[#0d2460] border-b border-yellow-600/30 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-stretch justify-between gap-2">
+                        {/* Desktop nav links */}
+                        <ul className="hidden lg:flex items-stretch">
+                            {NAV_LINKS.map(({ label, path }) => {
+                                const active = isActive(path);
+                                return (
+                                    <li key={path} className="relative flex items-stretch">
+                                        <Link to={path}
+                                            className={`flex items-center px-3 py-4 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap transition-colors duration-200 relative ${
+                                                active
+                                                    ? "text-yellow-400 after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[3px] after:bg-yellow-500 after:rounded-t-sm"
+                                                    : "text-white/65 hover:text-white hover:bg-white/5"
+                                            }`}>
+                                            {label}
+                                        </Link>
+                                    </li>
+                                );
+                            })}
+                        </ul>
 
-                    {/* Scrolled mini brand */}
-                    <Link to="/" className={`flex items-center gap-2 font-bold text-sm flex-shrink-0 transition-all duration-300 ${scrolled ? "opacity-100 py-2 mr-3 w-auto" : "opacity-0 w-0 overflow-hidden pointer-events-none"}`}>
-                        <img src="/images/logo.png" alt="SRES"
-                            className="h-7 w-7 rounded-full object-cover border border-yellow-400 bg-white p-0.5" />
-                        <span className="text-yellow-400 whitespace-nowrap">SRES</span>
-                    </Link>
-
-                    {/* Desktop links */}
-                    <ul className="hidden lg:flex items-stretch">
-                        {NAV_LINKS.map(({ label, path }) => {
-                            const active = isActive(path);
-                            return (
-                                <li key={path} className="relative flex items-stretch">
-                                    <Link to={path}
-                                        className={`flex items-center px-3 py-4 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap transition-colors duration-200 relative ${
-                                            active
-                                                ? "text-yellow-400 after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[3px] after:bg-yellow-500 after:rounded-t-sm"
-                                                : "text-white/65 hover:text-white hover:bg-white/5"
-                                        }`}>
-                                        {label}
-                                    </Link>
-                                </li>
-                            );
-                        })}
-                    </ul>
-
-                    {/* Search + hamburger */}
-                    <div className="flex items-center gap-2 py-2 flex-shrink-0 ml-auto">
-                        <form onSubmit={handleSearch}
-                            className="hidden md:flex items-center bg-white/10 border border-white/20 rounded-full overflow-hidden focus-within:border-yellow-500/60 focus-within:bg-white/15 transition-all duration-200">
-                            <input
-                                type="search"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Search…"
-                                className="bg-transparent text-white placeholder-white/40 text-[13px] px-4 py-1.5 outline-none w-28 focus:w-40 transition-all duration-300"
-                            />
-                            <button type="submit" aria-label="Search"
-                                className="px-3 text-white/50 hover:text-yellow-400 transition-colors">
-                                <Search size={14} strokeWidth={2.5} />
-                            </button>
-                        </form>
-                        <button
-                            onClick={() => setMobileOpen((o) => !o)}
-                            aria-label="Toggle navigation"
-                            aria-expanded={mobileOpen}
-                            className="lg:hidden text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
-                        >
-                            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-                        </button>
-                    </div>
-                </div>
-
-                {/* Mobile drawer */}
-                <div className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${mobileOpen ? "max-h-screen" : "max-h-0"}`}>
-                    <div className="bg-[#071640] border-t border-yellow-600/20 px-4 pt-3 pb-5 space-y-1">
-                        {NAV_LINKS.map(({ label, path }) => {
-                            const active = isActive(path);
-                            return (
-                                <Link key={path} to={path}
-                                    className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-[13px] font-bold uppercase tracking-wider transition-all duration-200 ${
-                                        active
-                                            ? "bg-yellow-500/15 text-yellow-400 border border-yellow-500/30"
-                                            : "text-white/60 hover:bg-white/5 hover:text-white"
-                                    }`}>
-                                    {active && <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 flex-shrink-0" />}
-                                    {label}
-                                </Link>
-                            );
-                        })}
-                        <div className="pt-3 mt-1 border-t border-white/10 space-y-2">
-                            <Link to="/enroll"
-                                className="flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-[#0a1f52] font-extrabold text-xs uppercase tracking-widest w-full py-3 rounded-full transition-colors duration-200">
-                                <PencilLine size={14} strokeWidth={2.5} />
-                                Enroll Now
-                            </Link>
-                            <form onSubmit={handleSearch} className="flex items-center border border-white/15 rounded-full overflow-hidden">
+                        {/* Search + scrolled hamburger */}
+                        <div className="flex items-center gap-2 py-2 flex-shrink-0 ml-auto">
+                            <form onSubmit={handleSearch}
+                                className="hidden md:flex items-center bg-white/10 border border-white/20 rounded-full overflow-hidden focus-within:border-yellow-500/60 focus-within:bg-white/15 transition-all duration-200">
                                 <input
                                     type="search"
-                                    placeholder="Search…"
+                                    value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="bg-transparent text-white placeholder-white/40 text-sm px-4 py-2.5 outline-none flex-1"
+                                    placeholder="Search…"
+                                    className="bg-transparent text-white placeholder-white/40 text-[13px] px-4 py-1.5 outline-none w-28 focus:w-40 transition-all duration-300"
                                 />
-                                <button type="submit" className="px-4 text-white/50 hover:text-yellow-400 transition-colors">
-                                    <Search size={15} strokeWidth={2.5} />
+                                <button type="submit" aria-label="Search"
+                                    className="px-3 text-white/50 hover:text-yellow-400 active:text-yellow-400 transition-colors">
+                                    <Search size={14} strokeWidth={2.5} />
                                 </button>
                             </form>
+
+                            {/*
+                                Scrolled hamburger — appears in the nav bar ONLY after
+                                the top bar collapses, so there's always a visible toggle.
+                            */}
+                            <button
+                                onClick={() => setMobileOpen((o) => !o)}
+                                aria-label="Toggle navigation"
+                                aria-expanded={mobileOpen}
+                                className={`lg:hidden text-white p-2 rounded-lg active:bg-white/20 transition-all duration-300 ${scrolled ? "opacity-100 w-auto" : "opacity-0 w-0 overflow-hidden pointer-events-none"}`}
+                            >
+                                {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+                            </button>
                         </div>
                     </div>
-                </div>
-            </nav>
-        </header>
+
+                    {/* Mobile drawer */}
+                    <div className={`lg:hidden transition-all duration-300 ease-in-out overflow-hidden ${mobileOpen ? "max-h-[600px]" : "max-h-0"}`}>
+                        <div className="bg-[#071640] border-t border-yellow-600/20 px-4 pt-3 pb-5 space-y-1">
+
+                            {NAV_LINKS.map(({ label, path }) => {
+                                const active = isActive(path);
+                                return (
+                                    <Link key={path} to={path}
+                                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[13px] font-bold uppercase tracking-wider transition-all duration-200 ${
+                                            active
+                                                ? "bg-yellow-500/15 text-yellow-400 border border-yellow-500/30"
+                                                // active: responds to touch; hover: does NOT fire on mobile
+                                                : "text-white/60 active:bg-white/10 active:text-white"
+                                        }`}>
+                                        <span style={{
+                                            width: 6, height: 6, borderRadius: "50%", flexShrink: 0,
+                                            background: active ? "#f5c518" : "transparent",
+                                            border: active ? "none" : "1.5px solid rgba(255,255,255,0.2)",
+                                            transition: "all 0.2s",
+                                        }} />
+                                        {label}
+                                    </Link>
+                                );
+                            })}
+
+                            {/* Bottom actions */}
+                            <div className="pt-3 mt-2 border-t border-white/10 space-y-2">
+                                <Link to="/enroll"
+                                    className="flex items-center justify-center gap-2 bg-yellow-500 active:bg-yellow-300 text-[#0a1f52] font-extrabold text-xs uppercase tracking-widest w-full py-3 rounded-full transition-colors duration-200">
+                                    <PencilLine size={14} strokeWidth={2.5} />
+                                    Enroll Now
+                                </Link>
+                                <form onSubmit={handleSearch} className="flex items-center border border-white/15 rounded-full overflow-hidden">
+                                    <input
+                                        type="search"
+                                        placeholder="Search…"
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        className="bg-transparent text-white placeholder-white/40 text-sm px-4 py-2.5 outline-none flex-1"
+                                    />
+                                    <button type="submit" className="px-4 text-white/50 active:text-yellow-400 transition-colors">
+                                        <Search size={15} strokeWidth={2.5} />
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+            </header>
+        </>
     );
 }

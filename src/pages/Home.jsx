@@ -122,30 +122,56 @@ function GoldLine() {
     return <div className="w-12 h-1 bg-gradient-to-r from-yellow-600 to-yellow-400 rounded-full my-4" />;
 }
 
+// ── Helper: safely extract items from either array or paginated response ──
+function extractItems(data) {
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data.data)) return data.data;
+    return [];
+}
+
 export default function Home() {
     const [news, setNews] = useState([]);
     const [loadingNews, setLoadingNews] = useState(true);
 
     useEffect(() => {
-        fetch(API_URL + "/news")
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (Array.isArray(data)) {
-                    setNews(data.slice(0, 2));
-                } else if (data.data) {
-                    setNews(data.data.slice(0, 2));
-                } else {
-                    setNews([]);
-                }
+        // FIX: Fetch announcements AND news marked show_on_homepage=1,
+        // handle both array and paginated { data: [...] } response shapes,
+        // merge, sort by posted_at desc, show latest 4.
+        Promise.all([
+            fetch(`${API_URL}/announcements?show_on_homepage=1&per_page=10`)
+                .then((r) => {
+                    if (!r.ok) throw new Error("announcements fetch failed");
+                    return r.json();
+                })
+                .catch(() => []),
+            fetch(`${API_URL}/news?show_on_homepage=1&per_page=10`)
+                .then((r) => {
+                    if (!r.ok) throw new Error("news fetch failed");
+                    return r.json();
+                })
+                .catch(() => []),
+        ])
+            .then(([annData, newsData]) => {
+                const combined = [
+                    ...extractItems(annData),
+                    ...extractItems(newsData),
+                ];
+                // Sort newest first, take top 4
+                combined.sort((a, b) => {
+                    const da = new Date(a.posted_at || a.date || 0);
+                    const db = new Date(b.posted_at || b.date || 0);
+                    return db - da;
+                });
+                setNews(combined.slice(0, 4));
             })
-            .catch(function() { setNews([]); })
-            .finally(function() { setLoadingNews(false); });
+            .finally(() => setLoadingNews(false));
     }, []);
 
     function formatDate(dateStr) {
         if (!dateStr) return "";
-        var d = new Date(dateStr);
-        return d.toLocaleDateString();
+        const d = new Date(dateStr);
+        return d.toLocaleDateString("en-PH", { month: "long", day: "numeric", year: "numeric" });
     }
 
     return (
@@ -223,14 +249,12 @@ export default function Home() {
                             We value teachers who embody the following qualities:
                         </p>
                         <ul className="space-y-3 mb-8">
-                            {["Passion for Teaching", "Patience and Understanding", "Compassion and Empathy"].map(function(item) {
-                                return (
-                                    <li key={item} className="flex items-center gap-3 text-sm text-gray-700">
-                                        <CheckCircle2 size={18} className="text-yellow-500 flex-shrink-0" />
-                                        {item}
-                                    </li>
-                                );
-                            })}
+                            {["Passion for Teaching", "Patience and Understanding", "Compassion and Empathy"].map((item) => (
+                                <li key={item} className="flex items-center gap-3 text-sm text-gray-700">
+                                    <CheckCircle2 size={18} className="text-yellow-500 flex-shrink-0" />
+                                    {item}
+                                </li>
+                            ))}
                         </ul>
                         <Link
                             to="/contact"
@@ -269,8 +293,8 @@ export default function Home() {
                         </p>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                        {SUBJECTS.map(function(item) {
-                            var Icon = item.Icon;
+                        {SUBJECTS.map((item) => {
+                            const Icon = item.Icon;
                             return (
                                 <div
                                     key={item.title}
@@ -307,32 +331,28 @@ export default function Home() {
                             talents, discover their passions, and achieve their goals. Well-known for:
                         </p>
                         <ul className="space-y-2 mb-8">
-                            {["Professional Teachers", "Eco-Friendly School"].map(function(item) {
-                                return (
-                                    <li key={item} className="flex items-center gap-3 text-sm text-gray-700">
-                                        <CheckCircle2 size={17} className="text-yellow-500 flex-shrink-0" />
-                                        {item}
-                                    </li>
-                                );
-                            })}
+                            {["Professional Teachers", "Eco-Friendly School"].map((item) => (
+                                <li key={item} className="flex items-center gap-3 text-sm text-gray-700">
+                                    <CheckCircle2 size={17} className="text-yellow-500 flex-shrink-0" />
+                                    {item}
+                                </li>
+                            ))}
                         </ul>
                         <div className="grid grid-cols-3 gap-4 mb-8 py-6 border-y border-gray-100">
                             {[
                                 { Icon: Users,         value: 167, label: "Students" },
                                 { Icon: GraduationCap, value: 10,  label: "Teachers" },
                                 { Icon: Award,         value: 12,  label: "Awards"   },
-                            ].map(function(stat) {
-                                return (
-                                    <div key={stat.label} className="text-center">
-                                        <div className="text-2xl font-extrabold text-[#0a1f52]">
-                                            <Counter target={stat.value} />
-                                        </div>
-                                        <div className="text-gray-400 text-[11px] uppercase tracking-wide mt-1">
-                                            {stat.label}
-                                        </div>
+                            ].map((stat) => (
+                                <div key={stat.label} className="text-center">
+                                    <div className="text-2xl font-extrabold text-[#0a1f52]">
+                                        <Counter target={stat.value} />
                                     </div>
-                                );
-                            })}
+                                    <div className="text-gray-400 text-[11px] uppercase tracking-wide mt-1">
+                                        {stat.label}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                         <Link
                             to="/enroll"
@@ -364,31 +384,29 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* 5. SCHOOL NEWS — live from API */}
+            {/* 5. SCHOOL NEWS — admin-curated via show_on_homepage */}
             <section className="bg-[#f4f6fb] py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6">
                     <div className="text-center mb-12">
                         <SectionLabel>Latest Updates</SectionLabel>
                         <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0a1f52] mt-2 mb-2">
-                            School News
+                            School Updates
                         </h2>
                         <p className="text-gray-500 text-sm">Stay tuned for the latest updates.</p>
                     </div>
 
                     {loadingNews && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            {[1, 2].map(function(i) {
-                                return (
-                                    <div key={i} className="flex bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm animate-pulse">
-                                        <div className="w-36 flex-shrink-0 bg-gray-200" />
-                                        <div className="p-5 flex-1 space-y-3">
-                                            <div className="h-4 bg-gray-200 rounded w-3/4" />
-                                            <div className="h-3 bg-gray-200 rounded w-1/2" />
-                                            <div className="h-3 bg-gray-200 rounded w-full" />
-                                        </div>
+                            {[1, 2].map((i) => (
+                                <div key={i} className="flex bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm animate-pulse">
+                                    <div className="w-36 flex-shrink-0 bg-gray-200" style={{ minHeight: 140 }} />
+                                    <div className="p-5 flex-1 space-y-3">
+                                        <div className="h-4 bg-gray-200 rounded w-3/4" />
+                                        <div className="h-3 bg-gray-200 rounded w-1/2" />
+                                        <div className="h-3 bg-gray-200 rounded w-full" />
                                     </div>
-                                );
-                            })}
+                                </div>
+                            ))}
                         </div>
                     )}
 
@@ -400,47 +418,71 @@ export default function Home() {
 
                     {!loadingNews && news.length > 0 && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            {news.map(function(item) {
-                                return (
-                                    <Link
-                                        key={item.id}
-                                        to="/announcement"
-                                        className="group flex bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
-                                    >
-                                        <div className="w-36 flex-shrink-0 overflow-hidden bg-gray-100">
-                                            {item.image ? (
-                                                <img
-                                                    src={"http://127.0.0.1:8000/storage/" + item.image}
-                                                    alt={item.title}
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full bg-[#0a1f52]/10 flex items-center justify-center">
-                                                    <Star size={24} className="text-[#0a1f52]/30" />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="p-5 flex-1 min-w-0">
-                                            <h3 className="text-[#0a1f52] font-bold text-sm leading-snug mb-2 group-hover:text-yellow-700 transition-colors">
-                                                {item.title}
-                                            </h3>
-                                            <div className="flex items-center gap-3 text-gray-400 text-[11px] mb-3">
-                                                <span className="flex items-center gap-1">
-                                                    <Calendar size={11} />
-                                                    {formatDate(item.posted_at)}
-                                                </span>
+                            {news.map((item) => (
+                                <Link
+                                    key={item.id}
+                                    to="/announcement"
+                                    className="group flex bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+                                >
+                                    {/* Thumbnail — always on left */}
+                                    <div className="w-36 flex-shrink-0 overflow-hidden bg-gray-100" style={{ minHeight: 140 }}>
+                                        {item.image_url ? (
+                                            <img
+                                                src={item.image_url}
+                                                alt={item.title}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                style={{ display: "block" }}
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full bg-[#0a1f52]/10 flex items-center justify-center" style={{ minHeight: 140 }}>
+                                                <Star size={24} className="text-[#0a1f52]/30" />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Content — right side */}
+                                    <div className="p-5 flex-1 min-w-0">
+                                        {/* Type badge */}
+                                        <span className={`inline-block text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded mb-2 ${
+                                            item.type === "news"
+                                                ? "bg-yellow-100 text-yellow-800"
+                                                : "bg-blue-50 text-blue-800"
+                                        }`}>
+                                            {item.type === "news" ? "News" : "Announcement"}
+                                        </span>
+
+                                        <h3 className="text-[#0a1f52] font-bold text-sm leading-snug mb-2 group-hover:text-yellow-700 transition-colors line-clamp-2">
+                                            {item.title}
+                                        </h3>
+                                        <div className="flex items-center gap-3 text-gray-400 text-[11px] mb-3">
+                                            <span className="flex items-center gap-1">
+                                                <Calendar size={11} />
+                                                {item.date || formatDate(item.posted_at)}
+                                            </span>
+                                            {item.created_by && (
                                                 <span className="flex items-center gap-1">
                                                     <User size={11} />
-                                                    {item.created_by || "Admin"}
+                                                    {item.created_by}
                                                 </span>
-                                            </div>
-                                            <p className="text-gray-500 text-xs leading-relaxed line-clamp-3">
-                                                {item.content}
-                                            </p>
+                                            )}
                                         </div>
-                                    </Link>
-                                );
-                            })}
+                                        <p className="text-gray-500 text-xs leading-relaxed line-clamp-3">
+                                            {item.content}
+                                        </p>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+
+                    {!loadingNews && news.length > 0 && (
+                        <div className="text-center mt-8 flex flex-wrap justify-center gap-3">
+                            <Link
+                                to="/announcement"
+                                className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-[#0a1f52] font-extrabold text-sm px-7 py-3 rounded-full transition-colors duration-200"
+                            >
+                                View All Updates
+                            </Link>
                         </div>
                     )}
                 </div>

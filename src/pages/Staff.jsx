@@ -1,4 +1,7 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+
+const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
 
 /* ─── Social Icons ───────────────────────────────────────── */
 function IconFacebook({ size = 15 }) {
@@ -17,42 +20,79 @@ function IconMessenger({ size = 15 }) {
     );
 }
 
+function IconTwitter({ size = 15 }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+        </svg>
+    );
+}
+
+function IconLinkedIn({ size = 15 }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z" />
+            <circle cx="4" cy="4" r="2" />
+        </svg>
+    );
+}
+
 const IMAGES = { hero: "/images/hero-img-1-min.jpg" };
+const QUOTE  = "I can do all things through Christ which strengtheneth me.";
 
-const PRINCIPAL = {
-    name: "Randy T. Odi",
-    position: "School Principal",
-    img: "/images/staff_1.jpg",
-    facebook: "#",
-    messenger: "#",
-    quote: "I can do all things through Christ which strengtheneth me.",
-};
+/* ─── Grade badge label helper ──────────────────────────── */
+function gradeLabel(position) {
+    if (!position) return "Faculty";
+    const p = position.toLowerCase();
+    if (p.includes("principal"))  return "Principal";
+    if (p.includes("kinder"))     return "Kinder";
+    if (p.includes("grade i ") || p.endsWith("grade i"))   return "Grade I";
+    if (p.includes("grade ii ") || p.endsWith("grade ii"))  return "Grade II";
+    if (p.includes("grade iii") || p.endsWith("grade iii")) return "Grade III";
+    if (p.includes("grade iv"))  return "Grade IV";
+    if (p.includes("grade v ") || p.endsWith("grade v"))   return "Grade V";
+    if (p.includes("grade vi"))  return "Grade VI";
+    return "Faculty";
+}
 
-const STAFF = [
-    { name: "Mercy O. De Leon",     position: "Kinder Adviser",    grade: "Kinder",    img: "/images/staff_2.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-    { name: "Janice T. Odiaman",    position: "Grade I Adviser",   grade: "Grade I",   img: "/images/staff_3.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-    { name: "Elizabeth T. Villary", position: "Grade II Adviser",  grade: "Grade II",  img: "/images/staff_4.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-    { name: "Analisa O. Cepriano",  position: "Grade III Adviser", grade: "Grade III", img: "/images/staff_5.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-    { name: "Cecile C. Alano",      position: "Grade IV Adviser",  grade: "Grade IV",  img: "/images/staff_6.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-    { name: "Elena T. Odi",         position: "Grade V Adviser",   grade: "Grade V",   img: "/images/staff_7.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-    { name: "Christina O. Tuplano", position: "Grade VI Adviser",  grade: "Grade VI",  img: "/images/staff_8.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-    { name: "Ginalyn T. Manlangit", position: "Grade VI Adviser",  grade: "Grade VI",  img: "/images/staff_9.jpg",  facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-    { name: "Ramil T. Dela Cruz",   position: "Subject Teacher",   grade: "Faculty",   img: "/images/staff_10.jpg", facebook: "#", messenger: "#", quote: "I can do all things through Christ which strengtheneth me." },
-];
+/* ─── Avatar fallback ────────────────────────────────────── */
+function Avatar({ name, imageUrl, size = 192 }) {
+    const initials = name
+        .split(" ")
+        .slice(0, 2)
+        .map((w) => w[0])
+        .join("")
+        .toUpperCase();
+    return imageUrl ? (
+        <img
+            src={imageUrl}
+            alt={name}
+            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+                e.currentTarget.style.display = "none";
+                e.currentTarget.nextSibling && (e.currentTarget.nextSibling.style.display = "flex");
+            }}
+        />
+    ) : (
+        <div
+            className="w-full h-full flex items-center justify-center"
+            style={{ background: "#e8edf8", fontSize: size / 4, fontWeight: 800, color: "#0a1f52" }}
+        >
+            {initials}
+        </div>
+    );
+}
 
 /* ─── Staff Card ──────────────────────────────────────────── */
-function StaffCard({ name, position, grade, img, facebook, messenger, quote }) {
+function StaffCard({ name, position, image_url, facebook_url, twitter_url, linkedin_url }) {
+    const grade = gradeLabel(position);
     return (
         <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-xl transition-all duration-200 relative flex flex-col h-full">
             <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#0a1f52] to-[#1a3a8a] opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10" />
 
             {/* Photo */}
             <div className="relative w-full h-64 overflow-hidden bg-[#eef1f8] flex-shrink-0">
-                <img
-                    src={img}
-                    alt={name}
-                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                />
+                <Avatar name={name} imageUrl={image_url} />
                 <span className="absolute top-3 right-3 bg-[#0a1f52] text-yellow-400 text-[9px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full border border-yellow-400/40">
                     {grade}
                 </span>
@@ -62,19 +102,92 @@ function StaffCard({ name, position, grade, img, facebook, messenger, quote }) {
             <div className="p-5 flex flex-col flex-1">
                 <h3 className="text-[#0a1f52] font-bold text-[15px] mb-0.5">{name}</h3>
                 <span className="block text-[11px] font-extrabold uppercase tracking-wide text-yellow-700 mb-3">{position}</span>
-                <p className="text-gray-400 text-xs leading-relaxed italic mb-4 flex-1">"{quote}"</p>
+                <p className="text-gray-400 text-xs leading-relaxed italic mb-4 flex-1">"{QUOTE}"</p>
                 <div className="flex gap-2 mt-auto">
-                    <a href={facebook} target="_blank" rel="noopener noreferrer"
-                        className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-[#0a1f52] hover:text-yellow-400 hover:border-[#0a1f52] transition-all duration-200"
-                        title="Facebook">
-                        <IconFacebook size={14} />
-                    </a>
-                    <a href={messenger} target="_blank" rel="noopener noreferrer"
-                        className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-[#0a1f52] hover:text-yellow-400 hover:border-[#0a1f52] transition-all duration-200"
-                        title="Messenger">
-                        <IconMessenger size={14} />
-                    </a>
+                    {facebook_url && (
+                        <a href={facebook_url} target="_blank" rel="noopener noreferrer"
+                            className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-[#0a1f52] hover:text-yellow-400 hover:border-[#0a1f52] transition-all duration-200"
+                            title="Facebook">
+                            <IconFacebook size={14} />
+                        </a>
+                    )}
+                    {twitter_url && (
+                        <a href={twitter_url} target="_blank" rel="noopener noreferrer"
+                            className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-[#0a1f52] hover:text-yellow-400 hover:border-[#0a1f52] transition-all duration-200"
+                            title="Twitter / X">
+                            <IconTwitter size={14} />
+                        </a>
+                    )}
+                    {linkedin_url && (
+                        <a href={linkedin_url} target="_blank" rel="noopener noreferrer"
+                            className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-[#0a1f52] hover:text-yellow-400 hover:border-[#0a1f52] transition-all duration-200"
+                            title="LinkedIn">
+                            <IconLinkedIn size={14} />
+                        </a>
+                    )}
+                    {/* Fallback social dots if no links set */}
+                    {!facebook_url && !twitter_url && !linkedin_url && (
+                        <span className="text-[11px] text-gray-300 italic">No socials yet</span>
+                    )}
                 </div>
+            </div>
+        </div>
+    );
+}
+
+/* ─── Principal Card (featured) ──────────────────────────── */
+function PrincipalCard({ name, position, image_url, facebook_url, twitter_url, linkedin_url }) {
+    return (
+        <div className="bg-[#0a1f52] rounded-2xl overflow-hidden flex flex-col sm:flex-row max-w-[560px] w-full shadow-xl relative">
+            <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-yellow-700 via-yellow-400 to-yellow-700" />
+            <div className="w-full sm:w-48 h-56 sm:h-auto flex-shrink-0 bg-[#0d2660] overflow-hidden">
+                <Avatar name={name} imageUrl={image_url} size={192} />
+            </div>
+            <div className="p-7 flex flex-col justify-center">
+                <span className="inline-flex items-center gap-1.5 bg-yellow-400/15 border border-yellow-400/35 text-yellow-200 text-[9px] font-extrabold uppercase tracking-[0.16em] px-3 py-1 rounded-full mb-3 w-fit">
+                    ★ &nbsp; School Principal
+                </span>
+                <h3 className="text-white font-extrabold text-xl mb-1">{name}</h3>
+                <span className="block text-yellow-400 text-[11px] font-extrabold uppercase tracking-widest mb-3">{position}</span>
+                <p className="text-white/55 text-sm leading-relaxed italic mb-5">"{QUOTE}"</p>
+                <div className="flex gap-2">
+                    {facebook_url && (
+                        <a href={facebook_url} target="_blank" rel="noopener noreferrer"
+                            className="w-9 h-9 rounded-lg bg-white/8 border border-white/15 flex items-center justify-center text-white/60 hover:bg-yellow-400/20 hover:text-yellow-400 hover:border-yellow-400/40 transition-all duration-200"
+                            title="Facebook">
+                            <IconFacebook size={15} />
+                        </a>
+                    )}
+                    {twitter_url && (
+                        <a href={twitter_url} target="_blank" rel="noopener noreferrer"
+                            className="w-9 h-9 rounded-lg bg-white/8 border border-white/15 flex items-center justify-center text-white/60 hover:bg-yellow-400/20 hover:text-yellow-400 hover:border-yellow-400/40 transition-all duration-200"
+                            title="Twitter / X">
+                            <IconTwitter size={15} />
+                        </a>
+                    )}
+                    {linkedin_url && (
+                        <a href={linkedin_url} target="_blank" rel="noopener noreferrer"
+                            className="w-9 h-9 rounded-lg bg-white/8 border border-white/15 flex items-center justify-center text-white/60 hover:bg-yellow-400/20 hover:text-yellow-400 hover:border-yellow-400/40 transition-all duration-200"
+                            title="LinkedIn">
+                            <IconLinkedIn size={15} />
+                        </a>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/* ─── Skeleton loader ────────────────────────────────────── */
+function SkeletonCard() {
+    return (
+        <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 flex flex-col">
+            <div className="w-full h-64 bg-gray-100 animate-pulse" />
+            <div className="p-5 flex flex-col gap-3">
+                <div className="h-4 w-2/3 bg-gray-100 rounded animate-pulse" />
+                <div className="h-3 w-1/2 bg-gray-100 rounded animate-pulse" />
+                <div className="h-3 w-full bg-gray-100 rounded animate-pulse" />
+                <div className="h-3 w-4/5 bg-gray-100 rounded animate-pulse" />
             </div>
         </div>
     );
@@ -84,15 +197,33 @@ function StaffCard({ name, position, grade, img, facebook, messenger, quote }) {
    STAFF PAGE
 ══════════════════════════════════════════════════════════ */
 export default function Staff() {
+    const [allStaff, setAllStaff] = useState([]);
+    const [loading,  setLoading]  = useState(true);
+    const [error,    setError]    = useState(null);
+
+    useEffect(() => {
+        fetch(`${API_BASE}/staff`)
+            .then((r) => {
+                if (!r.ok) throw new Error(`Server error ${r.status}`);
+                return r.json();
+            })
+            .then((data) => {
+                setAllStaff(Array.isArray(data) ? data : data.data ?? []);
+            })
+            .catch((err) => setError(err.message))
+            .finally(() => setLoading(false));
+    }, []);
+
+    // First staff member (lowest display_order) is the principal
+    const principal = allStaff[0] ?? null;
+    const rest      = allStaff.slice(1);
+
     return (
         <div style={{ background: "#f2efe8", minHeight: "100vh" }}>
 
             {/* ── HERO ─────────────────────────────────────────── */}
             <section className="relative overflow-hidden" style={{ minHeight: 340 }}>
-                {/* Left navy half */}
                 <div className="absolute inset-0 bg-[#0a1f52]" />
-
-                {/* Right photo, clipped diagonally */}
                 <div
                     className="absolute right-0 top-0 h-full w-3/5"
                     style={{ clipPath: "polygon(12% 0, 100% 0, 100% 100%, 0% 100%)" }}
@@ -101,25 +232,22 @@ export default function Staff() {
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to right, #0a1f52 0%, transparent 40%)" }} />
                     <div className="absolute inset-0 bg-[#0a1f52]/45" />
                 </div>
-
-                {/* Gold bottom stripe */}
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-700 via-yellow-400 to-yellow-700 z-10" />
 
-                    {/* Content — left-aligned, flex column, same as About */}
-                    <div style={{ position: "relative", zIndex: 1, maxWidth: 1280, margin: "0 auto", padding: "80px 24px 96px" }}>
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                            <p style={{ color: "#facc15", fontSize: 11, fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", margin: "0 0 12px 0" }}>
+                <div style={{ position: "relative", zIndex: 1, maxWidth: 1280, margin: "0 auto", padding: "80px 24px 96px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                        <p style={{ color: "#facc15", fontSize: 11, fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", margin: "0 0 12px 0" }}>
                             San Roque Elementary School
-                            </p>
-                            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-none mb-5">
-                                Our <span className="text-yellow-400">Teachers</span>
-                            </h1>
-                            <p className="text-white/55 text-[15px] leading-relaxed max-w-md">
-                                We're here to help. Meet the dedicated educators who make San Roque
-                                Elementary School a place of success and learning.
-                            </p>
-                        </div>
+                        </p>
+                        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-none mb-5">
+                            Our <span className="text-yellow-400">Teachers</span>
+                        </h1>
+                        <p className="text-white/55 text-[15px] leading-relaxed max-w-md">
+                            We're here to help. Meet the dedicated educators who make San Roque
+                            Elementary School a place of success and learning.
+                        </p>
                     </div>
+                </div>
             </section>
 
             {/* ── STAFF SECTION ─────────────────────────────────── */}
@@ -139,52 +267,70 @@ export default function Staff() {
                         </p>
                     </div>
 
-                    {/* ── Principal (featured) ── */}
-                    <div className="flex justify-center mb-14">
-                        <div className="bg-[#0a1f52] rounded-2xl overflow-hidden flex flex-col sm:flex-row max-w-[560px] w-full shadow-xl relative">
-                            <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-yellow-700 via-yellow-400 to-yellow-700" />
-                            <img
-                                src={PRINCIPAL.img}
-                                alt={PRINCIPAL.name}
-                                className="w-full sm:w-48 h-56 sm:h-auto object-cover object-top flex-shrink-0 bg-[#0d2660]"
-                            />
-                            <div className="p-7 flex flex-col justify-center">
-                                <span className="inline-flex items-center gap-1.5 bg-yellow-400/15 border border-yellow-400/35 text-yellow-200 text-[9px] font-extrabold uppercase tracking-[0.16em] px-3 py-1 rounded-full mb-3 w-fit">
-                                    ★ &nbsp; School Principal
-                                </span>
-                                <h3 className="text-white font-extrabold text-xl mb-1">{PRINCIPAL.name}</h3>
-                                <span className="block text-yellow-400 text-[11px] font-extrabold uppercase tracking-widest mb-3">{PRINCIPAL.position}</span>
-                                <p className="text-white/55 text-sm leading-relaxed italic mb-5">"{PRINCIPAL.quote}"</p>
-                                <div className="flex gap-2">
-                                    <a href={PRINCIPAL.facebook} target="_blank" rel="noopener noreferrer"
-                                        className="w-9 h-9 rounded-lg bg-white/8 border border-white/15 flex items-center justify-center text-white/60 hover:bg-yellow-400/20 hover:text-yellow-400 hover:border-yellow-400/40 transition-all duration-200"
-                                        title="Facebook">
-                                        <IconFacebook size={15} />
-                                    </a>
-                                    <a href={PRINCIPAL.messenger} target="_blank" rel="noopener noreferrer"
-                                        className="w-9 h-9 rounded-lg bg-white/8 border border-white/15 flex items-center justify-center text-white/60 hover:bg-yellow-400/20 hover:text-yellow-400 hover:border-yellow-400/40 transition-all duration-200"
-                                        title="Messenger">
-                                        <IconMessenger size={15} />
-                                    </a>
-                                </div>
-                            </div>
+                    {/* ── Error state ── */}
+                    {error && (
+                        <div className="text-center py-16">
+                            <p className="text-red-500 font-semibold mb-2">Failed to load staff.</p>
+                            <p className="text-gray-400 text-sm">{error}</p>
                         </div>
-                    </div>
+                    )}
 
-                    {/* ── Divider ── */}
-                    <div className="relative text-center mb-10">
-                        <div className="absolute top-1/2 left-0 right-0 h-px bg-gray-200" />
-                        <span className="relative bg-[#f4f6fb] px-4 text-[11px] font-extrabold uppercase tracking-widest text-gray-400">
-                            Meet Our Teachers
-                        </span>
-                    </div>
+                    {/* ── Loading skeletons ── */}
+                    {loading && !error && (
+                        <>
+                            {/* Principal skeleton */}
+                            <div className="flex justify-center mb-14">
+                                <div className="bg-[#0a1f52]/10 rounded-2xl overflow-hidden flex flex-col sm:flex-row max-w-[560px] w-full h-56 animate-pulse" />
+                            </div>
+                            <div className="relative text-center mb-10">
+                                <div className="absolute top-1/2 left-0 right-0 h-px bg-gray-200" />
+                                <span className="relative bg-[#f4f6fb] px-4 text-[11px] font-extrabold uppercase tracking-widest text-gray-400">
+                                    Meet Our Teachers
+                                </span>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+                            </div>
+                        </>
+                    )}
 
-                    {/* ── Staff Grid ── */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-                        {STAFF.map((member) => (
-                            <StaffCard key={member.name} {...member} />
-                        ))}
-                    </div>
+                    {/* ── Loaded ── */}
+                    {!loading && !error && (
+                        <>
+                            {/* Principal */}
+                            {principal && (
+                                <div className="flex justify-center mb-14">
+                                    <PrincipalCard {...principal} />
+                                </div>
+                            )}
+
+                            {/* Divider */}
+                            {rest.length > 0 && (
+                                <div className="relative text-center mb-10">
+                                    <div className="absolute top-1/2 left-0 right-0 h-px bg-gray-200" />
+                                    <span className="relative bg-[#f4f6fb] px-4 text-[11px] font-extrabold uppercase tracking-widest text-gray-400">
+                                        Meet Our Teachers
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Staff Grid */}
+                            {rest.length > 0 && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+                                    {rest.map((member) => (
+                                        <StaffCard key={member.id} {...member} />
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Empty state */}
+                            {allStaff.length === 0 && (
+                                <div className="text-center py-20">
+                                    <p className="text-gray-400 text-sm">No staff members found.</p>
+                                </div>
+                            )}
+                        </>
+                    )}
 
                 </div>
             </section>
