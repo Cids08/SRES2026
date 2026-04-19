@@ -118,14 +118,11 @@ function ProfileTab({ addToast }) {
         try {
             const fd = new FormData();
             fd.append("profile_photo", file);
-            // authHeader(false) → only Authorization header, NO Content-Type
-            // (browser must set Content-Type with multipart boundary itself)
             const token = localStorage.getItem("admin_token");
             const headers = token ? { Authorization: "Bearer " + token } : {};
             const res  = await fetch(`${API_URL}/admin/profile`, { method: "POST", headers, body: fd });
             const data = await res.json();
             if (!res.ok) throw new Error(data.message || "Upload failed.");
-            // Merge returned user data (preserving any fields not returned) into localStorage
             const current = JSON.parse(localStorage.getItem("admin_user") || "{}");
             localStorage.setItem("admin_user", JSON.stringify({ ...current, ...data.user }));
             addToast("Profile photo updated.");
@@ -154,7 +151,6 @@ function ProfileTab({ addToast }) {
         <SectionCard title="Admin Profile" subtitle="Your admin name, photo and contact details"
             icon={<svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>}>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 24, flexWrap: "wrap", marginBottom: 24 }}>
-                {/* Photo upload */}
                 <div style={{ textAlign: "center" }}>
                     <div style={{ position: "relative", width: 80, height: 80, margin: "0 auto 8px" }}>
                         <div style={{ width: 80, height: 80, borderRadius: "50%", background: NAV, border: `3px solid ${GOLD}`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
@@ -206,7 +202,6 @@ function ProfileTab({ addToast }) {
 
 /* ══════════════════════════════════════════════════════════════
    TAB: ACCOUNT & PASSWORD
-   — Wrong current password → sends forgot-password email
 ══════════════════════════════════════════════════════════════ */
 function AccountTab({ addToast }) {
     const [pw,           setPw]           = useState({ current: "", newPw: "", confirm: "" });
@@ -257,11 +252,9 @@ function AccountTab({ addToast }) {
             const res  = await fetch(`${API_URL}/admin/password`, { method: "PATCH", headers: authHeader(), body: JSON.stringify({ current_password: pw.current, password: pw.newPw, password_confirmation: pw.confirm }) });
             const data = await res.json();
             if (!res.ok) {
-                // If wrong current password, surface forgot-password option
                 const msg = data.message || "";
                 if (msg.toLowerCase().includes("incorrect") || msg.toLowerCase().includes("wrong") || res.status === 422) {
                     setErrors({ current: msg || "Current password is incorrect." });
-                    // surface forgot password hint
                 } else {
                     throw new Error(msg || "Failed to change password.");
                 }
@@ -298,7 +291,6 @@ function AccountTab({ addToast }) {
                         </Field>
                     ))}
 
-                    {/* Forgot password hint — shown when current password error occurs */}
                     {errors.current && (
                         <div style={{ padding: "12px 16px", background: "#fffbeb", border: "1.5px solid #fcd34d", borderRadius: 10 }}>
                             <p style={{ margin: "0 0 8px", fontSize: 12, color: "#92400e", fontFamily: SERIF }}>
@@ -333,7 +325,6 @@ function AccountTab({ addToast }) {
                     )}
                 </div>
 
-                {/* Standalone forgot password */}
                 {!errors.current && (
                     <div style={{ marginTop: 16, padding: "12px 16px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 10 }}>
                         <p style={{ margin: "0 0 8px", fontSize: 12, color: "#64748b", fontFamily: SERIF }}>
@@ -512,7 +503,7 @@ const SITE_PAGES = [
 ];
 
 /* ══════════════════════════════════════════════════════════════
-   TAB: SITE SETTINGS — school info now displayed live on the site
+   TAB: SITE SETTINGS
 ══════════════════════════════════════════════════════════════ */
 function FrontendTab({ addToast }) {
     const DEFAULT = {
@@ -574,9 +565,15 @@ function FrontendTab({ addToast }) {
     async function save() {
         setLoading(true);
         try {
+            // ✅ FIX: send maintenance_pages as a plain array, NOT JSON.stringify'd.
+            // The PHP backend receives it via JSON body and does its own json_encode
+            // before storing. Pre-stringifying it here causes PHP to see a string
+            // instead of an array, hitting the else branch and saving '[]' every time.
             const payload = {
                 ...form,
-                maintenance_pages: JSON.stringify(Array.isArray(form.maintenance_pages) ? form.maintenance_pages : []),
+                maintenance_pages: Array.isArray(form.maintenance_pages)
+                    ? form.maintenance_pages
+                    : [],
             };
             const res  = await fetch(`${API_URL}/admin/site-settings`, { method: "POST", headers: authHeader(), body: JSON.stringify(payload) });
             const data = await res.json();
@@ -608,7 +605,6 @@ function FrontendTab({ addToast }) {
 
     return (
         <>
-            {/* Live preview info banner */}
             <div style={{ padding: "12px 16px", background: "#eff6ff", border: "1.5px solid #93c5fd", borderRadius: 10, marginBottom: 20, display: "flex", gap: 10, alignItems: "flex-start" }}>
                 <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 1 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 <p style={{ margin: 0, fontSize: 12, color: "#1e40af", fontFamily: SERIF, lineHeight: 1.6 }}>
@@ -642,7 +638,6 @@ function FrontendTab({ addToast }) {
                     </Field>
                 </div>
 
-                {/* Live preview strip */}
                 <div style={{ marginTop: 18, padding: "14px 16px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 10 }}>
                     <p style={{ margin: "0 0 8px", fontSize: 10, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8" }}>Preview — How it appears on the website</p>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
