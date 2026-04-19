@@ -1,4 +1,3 @@
-import { createPortal } from "react-dom";
 import { useSettings } from "../App";
 
 const NAV   = "#0a1f52";
@@ -12,11 +11,14 @@ export default function Maintenance({ pageName = "This page" }) {
         maintenance_mode ||
         (Array.isArray(maintenance_pages) && maintenance_pages.includes("home"));
 
-    const content = (
+    // No more createPortal — render inline like EnrollmentClosed
+    return (
         <div style={{
-            position: "fixed", inset: 0, zIndex: 99999,
-            minHeight: "100vh", display: "flex", alignItems: "center",
-            justifyContent: "center", padding: "40px 20px",
+            minHeight: "80vh",           // ← was "100vh" + position fixed
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "40px 20px",
             background: "#f8fafc",
         }}>
             <div style={{ width: "100%", maxWidth: 520, textAlign: "center" }}>
@@ -51,7 +53,6 @@ export default function Maintenance({ pageName = "This page" }) {
                     ))}
                 </div>
 
-                {/* Only show Back to Homepage if home is NOT under maintenance */}
                 {!homeUnderMaintenance && (
                     <a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: NAV, color: GOLD, textDecoration: "none", fontSize: 13, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", padding: "14px 32px", borderRadius: 10 }}
                         onMouseEnter={e => { e.currentTarget.style.opacity = "0.85"; }}
@@ -61,7 +62,6 @@ export default function Maintenance({ pageName = "This page" }) {
                     </a>
                 )}
 
-                {/* When home is also down, show a neutral message instead */}
                 {homeUnderMaintenance && (
                     <p style={{ fontSize: 13, color: "#94a3b8", fontFamily: SERIF, margin: 0 }}>
                         The entire site is currently under maintenance. Please check back later.
@@ -77,8 +77,4 @@ export default function Maintenance({ pageName = "This page" }) {
             </div>
         </div>
     );
-
-    // Portal to document.body so the fixed overlay escapes the layout's
-    // stacking context — this hides the navbar/footer entirely.
-    return createPortal(content, document.body);
 }
